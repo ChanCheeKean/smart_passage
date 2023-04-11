@@ -30,3 +30,8 @@ class Status:
         # Zone 2 (left of safety)
         self.person_in_zone_2 = 0
         self.object_in_zone_2 = 0
+
+# where is gate roi and safety
+# print blob.zones
+# print_blobs_in_image, disable type == object
+# 

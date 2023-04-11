@@ -16,8 +16,8 @@ import time
 import json
 from status import Status
 from blob import Blob
-from blob import BlobType
-from tracking import Tracker
+# from blob import BlobType
+from tracking import Tracker, BlobType
 from typing import List
 import acquisition
 
