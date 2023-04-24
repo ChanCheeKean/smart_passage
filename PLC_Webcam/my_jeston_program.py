@@ -563,7 +563,6 @@ if __name__ == '__main__':
             print("Entire Loop = {}".format(bench_end_loop - bench_start_loop))
             print("############## END Bench Time ##############")
 
-
     except Exception as e:
         print(str(e))
 
