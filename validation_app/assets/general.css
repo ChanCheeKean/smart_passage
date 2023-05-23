@@ -1,0 +1,12 @@
+body {
+    /* padding-top: 2rem; */
+    background-color : white;
+}
+
+.hover-red:hover {
+    color : #c94e50 !important;
+}
+
+.hover-dim:hover {
+    opacity : 0.6;
+  }
