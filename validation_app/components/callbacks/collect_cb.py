@@ -19,8 +19,9 @@ data_path = os.path.join(".", "data", "landing")
     Input("url", "pathname"),
 )
 def return_dropdown_options(pth):
-    dir_list = glob(os.path.join(data_path, "*/"), recursive=True)
-    dir_list = [x.split("/")[-2] for x in dir_list]
+    dir_list = glob(os.path.join(data_path, "*"), recursive=True)
+    # dir_list = [x.split("/")[-2] for x in dir_list]
+    dir_list = [os.path.split(x)[-1] for x in dir_list]
     options = [{'label': x,'value': x} for x in dir_list]
     return options, dir_list[0]
 

@@ -21,13 +21,12 @@ if not os.path.exists(export_data_path):
         ],
     Input("url", "pathname"),
 )
-def return_dropdown_options(pth):
+def return_dropdown_options(_):
     # get the list of subfolders
-    dir_list = glob(os.path.join(data_path, "*/"), recursive=True)
-    dir_list = [x.split("/")[-2] for x in dir_list]
+    dir_list = glob(os.path.join(data_path, "*"), recursive=True)
+    dir_list = [os.path.split(x)[-1] for x in dir_list]
     options = [{'label': x,'value' : x} for x in dir_list]
     return options, dir_list[0]
-
 
 ### show image carousel ###
 @app.callback(
@@ -39,6 +38,9 @@ def return_dropdown_options(pth):
     Input("label_switch", "value"),
 )
 def show_img(lib, switch_bool):
+
+    if lib is None:
+        return no_update
 
     # get all the files in the subfolder
     folder_path = os.path.join(data_path, lib)
@@ -120,7 +122,8 @@ def return_index(ind, item):
     State("library_dropdown", "value"),
 )
 def return_index(n1, n2, n3, ind, item, class_in, zone_in, text_in, lib):
-
+    if lib is None:
+        return no_update
     # defined the export path for both images and labels
     ind = 0 if ind is None else ind
     folder_path = os.path.join(data_path, lib)

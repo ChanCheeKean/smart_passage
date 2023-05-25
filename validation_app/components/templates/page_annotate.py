@@ -116,7 +116,8 @@ input_but = dbc.Row(
 class_dropdown = dbc.Select(
     id="class_dropdown",
     style=general.dropdown_selector,
-    options=[{'label': key.title(),'value' : val} for key, val in zip(['human', 'object'], [0, 1]) ],
+    options=[{'label': key.title(),'value' : val} for key, val 
+             in zip(['human', 'object', 'None'], [0, 1, -1]) ],
     value='0',
     className='d-inline mx-1',
 )
@@ -133,7 +134,8 @@ class_select = html.Div(
 zone_dropdown = dbc.Select(
     id="zone_dropdown",
     style=general.dropdown_selector,
-    options=[{'label': key.title(),'value' : val} for key, val in zip(['left', 'safety', 'right'], [0, 1, 2]) ],
+    options=[{'label': key.title(),'value' : val} for key, val 
+             in zip(['left', 'safety', 'right', 'None'], [0, 1, 2, -1]) ],
     value='0',
     className='d-inline mx-1',
 )
