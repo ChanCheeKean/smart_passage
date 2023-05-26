@@ -10,3 +10,18 @@ body {
 .hover-dim:hover {
     opacity : 0.6;
   }
+
+.reset {
+    /* basic modern patch */
+    all: initial;
+    all: unset;
+}
+
+.pointer:hover, .pointer:active, .pointer:focus{
+    background-color: transparent;
+    color: transparent;
+    cursor: -webkit-grab; 
+    cursor: pointer;
+    border: 0;
+    outline : 0;
+  }
