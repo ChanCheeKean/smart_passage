@@ -1,4 +1,4 @@
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 from components.style import general
 from components.callbacks import validate_cb
@@ -31,16 +31,32 @@ input_select = html.Div(
     className='d-inline my-3',
 )
 
+### bar chart
+bar_chart = dcc.Loading(
+    children=dcc.Graph(
+        id='validate_bar', 
+        style=dict(height='60vh'),
+    ),
+    type="default")
+
+### bar chart
+pie_chart = dcc.Loading(
+    children=dcc.Graph(
+        id='validate_pie', 
+        style=dict(height='60vh'),
+    ),
+    type="default")
+
 ### final layout
 layout = html.Div(
         children = [
             input_select,
-            html.Div(id='validate_dummy'),
-            # dbc.Row(
-            #     children=[
-            #         dbc.Col([video_card], width=9),
-            #         dbc.Col([archive_card], width=3),
-            #         ],
-            #     className='my-1'),
+            html.Div(id='validate_store', style={'display': 'none'}),
+            dbc.Row(
+                children=[
+                    dbc.Col([bar_chart], width=6, className='px-1'),
+                    dbc.Col([pie_chart], width=6, className='px-1'),
+                    ],
+                className='my-5'),
         ]
     )

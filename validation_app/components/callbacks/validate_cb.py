@@ -1,13 +1,22 @@
-import os
-import json
+import os, json, random
+import cv2
 from glob import glob
 import pandas as pd
-import cv2
+import plotly.express as px
+from sklearn.metrics import classification_report
 from dash import Input, Output, State, no_update, callback_context
 from app import app
-
+from utils.plot_helper import create_bar, create_pie
 # initialize data path
 processed_data_path = os.path.join(".", "data", "processed")
+gate_xyxy = {
+    'top': 400,
+    'bottom': 620,
+    'left': 80,
+    'right': 1150,
+    'left-safety': 280,
+    'right-safety':800
+}
 
 ### libraries dropdown ###
 @app.callback(
@@ -26,14 +35,13 @@ def return_dropdown_options(_):
 
 # generate result
 @app.callback(
-    Output("validate_dummy", "children"),
+    Output("validate_store", "children"),
     Input("validate_but", "n_clicks"),
     Input("validate_library_dropdown", "value"),
 )
 def return_validate_result(n1, lib):
-    if n1 == 0:
-        return no_update
-
+    # if n1 == 0:
+    #     return no_update
     # get the location of tehe ground truth
     img_data_path = os.path.join(processed_data_path, lib, 'images')
     label_data_path = os.path.join(processed_data_path, lib, 'labels')
@@ -60,12 +68,21 @@ def return_validate_result(n1, lib):
                 # predict data
                 img = cv2.imread(img_pth)
                 img = cv2.resize(img, (720, 1280), interpolation=cv2.INTER_AREA)
-                temp_dic[f'img_shape'] = img.shape
 
-                pred_data = []
+                pred_data = [[500, 200, 600, 500, 0]]
                 for data in pred_data:
-                    if data.get('class', None) == '0':
-                        zone = data.get('zone', None)
+                    pred_class = data[-1]
+                    pred_center = (data[0] + data[3]) / 2
+                    if pred_center <= gate_xyxy['left-safety']:
+                        zone = 0
+                    elif pred_center <= gate_xyxy['right-safety']:
+                        zone = 1
+                    else:
+                        zone = 2
+
+                    if str(pred_class) == '0':
+                        # temporary
+                        zone = random.choice([0, 1, 2])
                         temp_dic[f'pred_human_zone_{zone}'] = 1
 
                     elif data.get('class', None) == '1':
@@ -82,7 +99,49 @@ def return_validate_result(n1, lib):
 
                 pd_lis.append(temp_dic)
         
+        column_names = [
+            'name', 'human_zone_0', 'human_zone_1', 'human_zone_2',
+            'pred_human_zone_0', 'pred_human_zone_1', 'pred_human_zone_2'
+        ]
         df = pd.DataFrame(pd_lis).fillna(0)
-        print(df)
+        miss_col = set(column_names) - set(df.columns)
+        for col in miss_col:
+            df[col] = 0
+        df = df[column_names]
+        return df.to_json(orient='split')
 
     return no_update
+
+# generate graph
+@app.callback(
+    [
+        Output('validate_bar', 'figure'),
+        Output('validate_pie', 'figure'),
+        ],
+    Input('validate_store', 'children')
+)
+def update_graph(data_json):
+    if data_json:
+        df = pd.read_json(data_json, orient='split')
+        cols = ['human_zone_0', 'human_zone_1', 'human_zone_2']
+        ground_truth = df[cols].values.tolist()
+        predictions = df[['pred_' + col for col in cols]].values.tolist()
+        report = classification_report(ground_truth, predictions, output_dict=True) 
+        df_report = pd.DataFrame(report).transpose()
+
+        # generate bar chart
+        cols = ['precision', 'recall', 'f1-score']
+        df_bar = df_report.iloc[[0, 1, 2]][cols].unstack().reset_index().copy()
+        df_bar.columns = ['metric', 'zone', 'score']
+        df_bar['zone'] = df_bar['zone'].astype(int)
+        bar_fig = create_bar(df_bar, 'score', 'metric', 'zone', 'group', 'Score', 'Metric')
+
+        # generate pie chart
+        df_pie = df_report.iloc[[0, 1, 2]][['support']].unstack().reset_index().copy()
+        df_pie.columns = ['metric', 'zone', 'score']
+        df_pie.sort_values('zone', ascending=True, inplace=True)
+        df_pie['zone'] = df_pie['zone'].astype(int)
+        pie_fig = create_pie(df_pie['zone'].values, df_pie['score'].values)
+        return bar_fig, pie_fig
+    
+    return no_update, no_update

@@ -170,14 +170,16 @@ info_card = dbc.Card(
     children=[
         dbc.CardHeader(html.P(id='img_annotate_header', className="fs-6 fw-bold my-2")),
         dbc.CardBody(
-            children=[
-                class_select,
-                zone_select,
-                desc_input,
-                saved_input,
-                repeat_toggle,
-                input_but,
-                ], 
+            dcc.Loading(
+                children=[
+                    class_select,
+                    zone_select,
+                    desc_input,
+                    saved_input,
+                    repeat_toggle,
+                    input_but,
+                    ], 
+                type="default"), 
             style={'height' : '88vh'},
         ),
     ],
