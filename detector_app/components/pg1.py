@@ -5,18 +5,21 @@ import dash_bootstrap_components as dbc
 import dash_daq as daq
 from app import server, app
 from utils.video_loader import ImageLoader
-from utils.detect_helper import VitModelLoader
+from utils.cv_helper import VitModelLoader, plot_gate_roi
 
 ### video streaming ###
 def video_gen(camera, model):
     while True:
         ret, image = camera.get_frame()
         if ret:
+            image = cv2.resize(image, camera.img_sz, interpolation=cv2.INTER_AREA)
             image = model.detect(image)
 
             if camera.save_video:
-                frame = cv2.resize(image, camera.img_sz, interpolation=cv2.INTER_AREA)
-                camera.out_writter.write(frame)
+                camera.out_writter.write(image)
+
+            if camera.plot_roi:
+                plot_gate_roi(image)
 
             _, jpeg = cv2.imencode('.jpg', image)
             frame = jpeg.tobytes()
@@ -28,14 +31,12 @@ def video_gen(camera, model):
 def video_feed():
     return Response(
         video_gen(ImageLoader(), VitModelLoader()),
-        mimetype='multipart/x-mixed-replace; boundary=frame'
-    )
+        mimetype='multipart/x-mixed-replace; boundary=frame')
 
 video_container = html.Img(
     src="/video_feed", 
     id='pg1_video',
-    style={'max-width': '100%', 'height' : '70vh', 'width' : '100%'},
-)
+    style={'max-width': '100%', 'height' : '70vh', 'width' : '100%'},)
 
 
 ### indicator ###
@@ -69,7 +70,6 @@ indicator_container = html.Div(
     ], 
     style={'margin-left': 'auto', 'margin-right': 'auto'}
 )
-
 
 ### images container ###
 archive_card = dbc.Card(
@@ -169,7 +169,7 @@ layout = html.Div(
     children = [
         dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
         dcc.Interval(id='pg1_interval_1', interval=1.8*1000, n_intervals=0),
-        html.H2("TailGate Monitoring Dashboard", className='text-info text-center my-1 fs-1'),
+        html.H2("SmartGate Passage", className='text-info text-center my-1 fs-1'),
         dbc.Row(
             children=[
                 dbc.Col(indicator_container, width=1),

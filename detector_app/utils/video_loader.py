@@ -68,6 +68,7 @@ class ImageLoader(object):
         self.cnt = 0
         self.source = video_config['source']
         self.save_video = video_config['save_video']
+        self.plot_roi = video_config['plot_roi']
         self.output_file_name = video_config['output_file_name']
         self.img_sz = video_config['img_sz']
         self.out_writter = cv2.VideoWriter(
@@ -79,9 +80,9 @@ class ImageLoader(object):
         self.webcam = self.source.isnumeric() or self.source.endswith('.txt') or self.source.startswith('rtsp')
         self.video_loader = cv2.VideoCapture(self.source)
 
-        # skip some frames and jump 
+        # skip some frames and jump
         self.frame_num = self.video_loader.get(cv2.CAP_PROP_FRAME_COUNT)
-        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, 50)
+        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 800)
 
         if self.webcam:
             self.video_loader = FreshestFrame(self.video_loader)
