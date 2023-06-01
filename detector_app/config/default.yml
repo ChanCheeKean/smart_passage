@@ -1,0 +1,45 @@
+video:
+  # source: "./static/test_video/test.mp4"
+  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  source: "./static/backup/saved_output.mp4"
+  save_video: False
+  output_file_name: "./static/test_video/saved_output.avi"
+  img_sz: 
+  - 640
+  - 640
+model:
+  # model_name: "./weights/yolov8n.pt"
+  model_name: "google/owlvit-base-patch32"
+  conf_thres: 0.25
+  iou_thres: 0.5
+  max_det: 100
+  device: ""
+  agnostic_nms: False
+  classes: 
+    - "person"
+    - "suitcase"
+    - "wheelchair"
+    - "luggage"
+    - "box"
+    - "stroller"
+    - "chair" 
+    - "trolley"
+    - "object"
+    # - 0
+    # - 2
+    # - 9
+    # - 12
+    # - 13
+    # - 20
+    # - 24
+    # - 38
+    # - 39
+    # - 46
+    # - 47
+    # - 52
+    # - 58
+    # - 120
+    # - 124
+    # - 129
+    # - 130
+    # - 192

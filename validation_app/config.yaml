@@ -1,0 +1,5 @@
+gate_roi:
+  left: 160
+  right: 440
+  top: 450
+  bottom: 480
