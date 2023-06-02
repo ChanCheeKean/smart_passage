@@ -163,56 +163,56 @@ class VitModelLoader():
         self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
         self.query = ['photo of a ' + str(label) for label in self.labels]
 
-    def detect(self, image):
+    def detect(self, image, plot=True):
+
+        # pre-processing and inference
         inputs = self.processor(text=[self.query], images=image, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outputs = self.model(**inputs)
         target_sizes = torch.Tensor([image.shape[0:2]]).to(self.device)
         results = self.processor.post_process_object_detection(
             outputs=outputs, target_sizes=target_sizes, threshold=self.conf_thres)[0]
-        
-        annotator = Annotator(image, line_width=self.font_size, example=self.labels)
         results = torch.cat(
             tensors=(results["boxes"], results["scores"].view(-1, 1), results["labels"].view(-1, 1)),
             dim=1)
         
-        in_roi = []
+        # only include tensor in roi and >confidence level
+        lis = []
         for ind, res in enumerate(results):
-            if check_roi(res, gate_xyxy, in_safety=False):
-                in_roi.append(ind)
+            cls = res[5].item()
+            threshold = self.conf_thres + 0.2 if cls == 0 else self.conf_thres
+            conf = round(res[4].item(), 3)
+            if (check_roi(res, gate_xyxy, in_safety=False)) and (conf > threshold):
+                lis.append(ind)
+        results = results[lis, :]
 
-        results = results[in_roi, :]
-        boxes, scores, labels = results[:, :4], results[:, 4], results[:, 5]
+        # apply non-max suppression
+        lis = []
+        if self.iou_thres < 1.0:
+            # split class for human and object
+            conditions = [results[:, 5] == 0, results[:, 5] != 0]
+            for i in range(len(conditions)):
+                res = results[(conditions[i]) & (results[:, 4] > 0)]
+                for i in torch.argsort(-res[:, 4]):
+                    ious = box_iou(res[i, :4].unsqueeze(0), res[:, :4])[0][0]
+                    # Mask self-IoU.
+                    ious[i] = -1.0 
+                    res[:, 4][ious > self.iou_thres] = 0.0
+                lis.append(res)
+        results = torch.cat(lis, dim=0)
+        results = results[results[:, 4] > 0]
 
-        # for human and object
-        colors = [(0, 0, 255), (255, 255, 0)]
-        label_cls = ['human', 'object']
-        cond = [labels==0, labels!=0]
-        threshold = [self.conf_thres + 0.2, self.conf_thres]
-
-        for c in range(2):
-            target_boxes = boxes[cond[c]]
-            target_labels = labels[cond[c]]
-            target_scores = scores[cond[c]]
-
-            # Apply non-maximum suppression (NMS)
-            if self.iou_thres < 1.0:
-                for i in torch.argsort(-target_scores):
-                    if not target_scores[i]:
-                        continue
-                    ious = box_iou(target_boxes[i, :].unsqueeze(0), target_boxes)[0][0]
-                    ious[i] = -1.0  # Mask self-IoU.
-                    target_scores[ious > self.iou_thres] = 0.0
-
-            # plotting
-            for score, label, box in zip(target_scores, target_labels, target_boxes):
-                if score > threshold[c]:
-                    bbox = [round(i, 2) for i in box.tolist()]
-                    conf = round(score.item(), 3)
-                    label_text = label_cls[c]
-                    label_text =  self.labels[int(label)]
-                    annotator.box_label(bbox, f'{label_text} {conf:.2f}', color=colors[c])
-        return image
+        # plotting
+        if plot:
+            annotator = Annotator(image, line_width=self.font_size, example=self.labels)
+            for ind, res in enumerate(results):
+                bbox = [round(i, 2) for i in res[:4].tolist()]
+                conf = round(res[4].item(), 3)
+                cls = res[5].item()
+                label_text =  self.labels[int(cls)]
+                color = (0, 0, 255) if cls == 0 else (255, 255, 0)
+                annotator.box_label(bbox, f'{label_text} {conf:.2f}', color=color)
+        return image, results
 
 ### Yolo Model ###
 class YoloLoader():

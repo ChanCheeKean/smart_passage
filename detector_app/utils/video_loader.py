@@ -82,7 +82,7 @@ class ImageLoader(object):
 
         # skip some frames and jump
         self.frame_num = self.video_loader.get(cv2.CAP_PROP_FRAME_COUNT)
-        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 800)
+        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 400)
 
         if self.webcam:
             self.video_loader = FreshestFrame(self.video_loader)

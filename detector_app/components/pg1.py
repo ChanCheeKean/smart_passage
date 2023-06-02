@@ -10,10 +10,10 @@ from utils.cv_helper import VitModelLoader, plot_gate_roi
 ### video streaming ###
 def video_gen(camera, model):
     while True:
-        ret, image = camera.get_frame()
+        ret, frame = camera.get_frame()
         if ret:
-            image = cv2.resize(image, camera.img_sz, interpolation=cv2.INTER_AREA)
-            image = model.detect(image)
+            image = cv2.resize(frame, camera.img_sz, interpolation=cv2.INTER_AREA)
+            image, results = model.detect(image)
 
             if camera.save_video:
                 camera.out_writter.write(image)
