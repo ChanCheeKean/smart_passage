@@ -19,7 +19,7 @@ model:
   # model_name: "./weights/yolov8n.pt"
   model_name: "google/owlvit-base-patch32"
   conf_thres: 0.11
-  iou_thres: 0.1
+  iou_thres: 0.3
   max_det: 100
   device: ""
   agnostic_nms: False
