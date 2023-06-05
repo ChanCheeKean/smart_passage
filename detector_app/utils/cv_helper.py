@@ -45,6 +45,7 @@ def plot_gate_roi(img):
 def check_roi(box, gate_xyxy, in_safety=False):
     '''Qualifier Criteria: Check if object is in the region of Interest and also within size limit
     '''
+    return True
     center = (box[0] + box[2]) / 2
     width = box[2] - box[0]
     height = box[3] - box[1]
@@ -180,7 +181,7 @@ class VitModelLoader():
         lis = []
         for ind, res in enumerate(results):
             cls = res[5].item()
-            threshold = self.conf_thres + 0.2 if cls == 0 else self.conf_thres
+            threshold = self.conf_thres + 0.1 if cls == 0 else self.conf_thres
             conf = round(res[4].item(), 3)
             if (check_roi(res, gate_xyxy, in_safety=False)) and (conf > threshold):
                 lis.append(ind)
@@ -191,6 +192,7 @@ class VitModelLoader():
         if self.iou_thres < 1.0:
             # split class for human and object
             conditions = [results[:, 5] == 0, results[:, 5] != 0]
+            conditions = [results[:, 5] != 100]
             for i in range(len(conditions)):
                 res = results[(conditions[i]) & (results[:, 4] > 0)]
                 for i in torch.argsort(-res[:, 4]):

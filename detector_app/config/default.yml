@@ -1,9 +1,9 @@
 video:
   # source: "./static/test_video/test.mp4"
-  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  source: "./static/backup/box.mp4"
+  source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  # source: "./static/backup/box.mp4"
   save_video: False
-  plot_roi: True
+  plot_roi: False
   output_file_name: "./static/test_video/saved_output.avi"
   img_sz:
   - 1280
@@ -18,9 +18,9 @@ gate_roi:
 model:
   # model_name: "./weights/yolov8n.pt"
   model_name: "google/owlvit-base-patch32"
-  conf_thres: 0.11
+  conf_thres: 0.05
   iou_thres: 0.3
-  max_det: 100
+  max_det: 1000
   device: ""
   agnostic_nms: False
   font_size: 2
@@ -29,11 +29,11 @@ model:
     - "suitcase"
     - "wheelchair"
     - "luggage"
+    - "baggage"
     - "box"
     - "stroller"
-    - "chair" 
+    # - "chair" 
     - "trolley"
-    - "baggage"
     # - "object"
     # - 0
     # - 2
