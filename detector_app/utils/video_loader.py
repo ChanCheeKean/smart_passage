@@ -71,6 +71,7 @@ class ImageLoader(object):
         self.plot_roi = video_config['plot_roi']
         self.output_file_name = video_config['output_file_name']
         self.img_sz = video_config['img_sz']
+        self.font_size = video_config['font_size']
         self.out_writter = cv2.VideoWriter(
             self.output_file_name, 
             cv2.VideoWriter_fourcc('M','J','P','G'), 
@@ -82,7 +83,7 @@ class ImageLoader(object):
 
         # skip some frames and jump
         self.frame_num = self.video_loader.get(cv2.CAP_PROP_FRAME_COUNT)
-        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 400)
+        self.video_loader.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 500)
 
         if self.webcam:
             self.video_loader = FreshestFrame(self.video_loader)

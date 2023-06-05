@@ -1,25 +1,45 @@
 import cv2
+import time, json
 from flask import Response
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from app import server, app
+from components import pg1_callback
 from utils.video_loader import ImageLoader
-from utils.cv_helper import VitModelLoader, plot_gate_roi
+from utils.cv_helper import DeepSortTracker, VitModelLoader, plot_gate_roi, plot_image, update_info
 
 ### video streaming ###
-def video_gen(camera, model):
+def video_gen(camera, model, object_tracker):
     while True:
-        ret, frame = camera.get_frame()
+        ret, image = camera.get_frame()
         if ret:
-            image = cv2.resize(frame, camera.img_sz, interpolation=cv2.INTER_AREA)
-            image, results = model.detect(image)
+            # pre-processing
+            image = cv2.resize(image, camera.img_sz, interpolation=cv2.INTER_AREA)
 
-            if camera.save_video:
-                camera.out_writter.write(image)
+            # detect and tracking
+            results = model.detect(image)
+            results = object_tracker.update(image, results)
 
+            # plotting
+            plot_image(image, results, camera.font_size, model.labels)
+
+            # plot roi area
             if camera.plot_roi:
                 plot_gate_roi(image)
+            
+            # save video
+            if camera.save_video:
+                camera.out_writter.write(image)
+            
+            # log the info
+            info_dict = update_info(results)
+            with open('./static/json/image_output.json', 'w') as f:
+                json.dump(info_dict, f)
+
+            # capture image if violation
+            # if (info_dict['tailgate_flag'] == 1) | (info_dict['antidir_flag'] == 1):
+                # cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
 
             _, jpeg = cv2.imencode('.jpg', image)
             frame = jpeg.tobytes()
@@ -30,7 +50,7 @@ def video_gen(camera, model):
 @server.route('/video_feed')
 def video_feed():
     return Response(
-        video_gen(ImageLoader(), VitModelLoader()),
+        video_gen(ImageLoader(), VitModelLoader(), DeepSortTracker()),
         mimetype='multipart/x-mixed-replace; boundary=frame')
 
 video_container = html.Img(
@@ -99,6 +119,7 @@ count_container = dbc.Row(
                                       color='red',
                                       className='d-inline-block mx-2',
                                       value=0),
+                                      
                                   daq.LEDDisplay(
                                       id='left_object_led',
                                       label={'label': "Object", 'style': {'color' : '#63e5ff', 'font-size' : '1.5rem'}},

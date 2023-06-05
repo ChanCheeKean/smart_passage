@@ -1,10 +1,11 @@
 video:
   # source: "./static/test_video/test.mp4"
-  source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  # source: "./static/backup/box.mp4"
+  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
   output_file_name: "./static/test_video/saved_output.avi"
+  font_size: 2
   img_sz:
   - 1280
   - 720
@@ -15,23 +16,27 @@ gate_roi:
   bottom: 720
   left-safety: 380
   right-safety : 780
+object_tracker:
+  reid_weights: "./weights/osnet_x0_25_msmt17.pt"
+  tracking_method: "deepocsort" 
+  tracking_config: "./trackers/deepocsort/configs/deepocsort.yaml"
 model:
   # model_name: "./weights/yolov8n.pt"
   model_name: "google/owlvit-base-patch32"
   conf_thres: 0.05
-  iou_thres: 0.3
+  iou_thres: 0.3 
   max_det: 1000
   device: ""
   agnostic_nms: False
-  font_size: 2
   classes: 
     - "person"
     - "suitcase"
     - "wheelchair"
     - "luggage"
     - "baggage"
-    - "box"
+    # - "box"
     - "stroller"
+
     # - "chair" 
     - "trolley"
     # - "object"

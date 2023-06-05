@@ -1,5 +1,6 @@
 import cv2
 import torch
+from pathlib import Path
 from utils.config_loader import config
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
 from ultralytics.yolo.utils.torch_utils import select_device
@@ -8,6 +9,7 @@ from ultralytics.yolo.utils.plotting import Annotator, colors
 # from yolov5.utils.general import non_max_suppression, scale_boxes
 from ultralytics.nn.autobackend import AutoBackend
 from ultralytics.yolo.utils.ops import non_max_suppression, scale_boxes
+from trackers.multi_tracker_zoo import create_tracker
 
 ### gate roi ###
 gate_xyxy = config['gate_roi']
@@ -22,6 +24,7 @@ def plot_gate_roi(img):
         (255, 0, 0), 
         2
     )
+
     # safety zone
     cv2.rectangle(
         img,
@@ -45,7 +48,6 @@ def plot_gate_roi(img):
 def check_roi(box, gate_xyxy, in_safety=False):
     '''Qualifier Criteria: Check if object is in the region of Interest and also within size limit
     '''
-    return True
     center = (box[0] + box[2]) / 2
     width = box[2] - box[0]
     height = box[3] - box[1]
@@ -59,14 +61,41 @@ def check_roi(box, gate_xyxy, in_safety=False):
     else:
         return in_roi and in_size
     
-def determine_zone(center, gate_xyxy):
+def determine_zone(det):
     '''check the zone of the passanger or object'''
+    center = (det[0] + det[1]) / 2
     if center < gate_xyxy['left-safety']:
         return 'left'
     elif center > gate_xyxy['right-safety']:
         return 'right'
     else:
         return 'safety'
+    
+def update_info(dets):
+    info_dict = {
+        'human_count' : 0, 
+        'human_left' : 0,
+        'human_safety': 0,
+        'human_right': 0,
+        'object_left' : 0,
+        'object_safety': 0,
+        'object_right': 0,
+        'tailgate_flag': False,
+        'antidir_flag': False,
+    }
+    
+    for det in dets:
+        cls = det[5].item()
+        object_id = det[6].item()
+        zone = determine_zone(det)
+        
+        if cls == 0:
+            info_dict['human_count'] += 1
+            info_dict[f'human_{zone}'] += 1
+        else:
+            info_dict[f'object_{zone}'] += 1
+
+        return info_dict
 
 ### tailgate detection ###
 def tailgating_detection(img, detections, trigger_distance):
@@ -121,7 +150,7 @@ def update_object_dict(detect_dict, warning_flag, oversize_flag, antidir_flag, o
         detect_dict['tailgate_flag'] = -1
     return detect_dict
 
-### non max suppression
+### non max suppression ###
 def box_iou(boxes1, boxes2):
     def _upcast(t):
         # Protects from numerical overflows in multiplications by upcasting to the equivalent higher type
@@ -146,13 +175,46 @@ def box_iou(boxes1, boxes2):
     iou = inter / union
     return iou, union
 
+### plotting function ###
+def plot_image(img, det_res, font_size, labels):
+    # plotting
+    annotator = Annotator(img, line_width=font_size, example=labels)
+    for _, res in enumerate(det_res):
+        bbox = [round(i, 2) for i in res[:4].tolist()]
+        conf = round(res[4].item(), 3)
+        cls = res[5].item()
+        object_id = res[6].item()
+        label_text =  labels[int(cls)]
+        color = (0, 0, 255) if cls == 0 else (255, 255, 0)
+        annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
+
+### object tracker ###
+class DeepSortTracker():
+    def __init__(self):
+        # init tracker and warmup
+        tracker_config = config['object_tracker']
+        tracking_method = tracker_config['tracking_method']
+        tracking_config = tracker_config['tracking_config']
+        reid_weights = Path(tracker_config['reid_weights'])
+        self.device = select_device(config['model']['device'])
+        self.deep_tracker = create_tracker(tracking_method, tracking_config, reid_weights, self.device, False)
+
+        if hasattr(self.deep_tracker, 'model'):
+            if hasattr(self.deep_tracker.model, 'warmup'):
+                self.deep_tracker.model.warmup()
+
+    def update(self, image, det):
+        with torch.no_grad():
+            outputs = torch.Tensor(self.deep_tracker.update(det.to(self.device), image))
+            outputs[:, [-3, -1]] = outputs[:, [-1, -3]]
+        return outputs
+
 ### OWL-Vit Model ###
 class VitModelLoader():
     def __init__(self):
         '''OWL-Vit model to detect and plot the image'''
         model_config = config['model']
         self.img_sz = config['video']['img_sz']
-        self.font_size = model_config['font_size']
         self.conf_thres = model_config['conf_thres']
         self.iou_thres = model_config['iou_thres']
         self.model_name = model_config['model_name']
@@ -164,8 +226,7 @@ class VitModelLoader():
         self.model = OwlViTForObjectDetection.from_pretrained(self.model_name).to(self.device)
         self.query = ['photo of a ' + str(label) for label in self.labels]
 
-    def detect(self, image, plot=True):
-
+    def detect(self, image):
         # pre-processing and inference
         inputs = self.processor(text=[self.query], images=image, return_tensors="pt").to(self.device)
         with torch.no_grad():
@@ -204,17 +265,7 @@ class VitModelLoader():
         results = torch.cat(lis, dim=0)
         results = results[results[:, 4] > 0]
 
-        # plotting
-        if plot:
-            annotator = Annotator(image, line_width=self.font_size, example=self.labels)
-            for ind, res in enumerate(results):
-                bbox = [round(i, 2) for i in res[:4].tolist()]
-                conf = round(res[4].item(), 3)
-                cls = res[5].item()
-                label_text =  self.labels[int(cls)]
-                color = (0, 0, 255) if cls == 0 else (255, 255, 0)
-                annotator.box_label(bbox, f'{label_text} {conf:.2f}', color=color)
-        return image, results
+        return results
 
 ### Yolo Model ###
 class YoloLoader():
@@ -264,3 +315,5 @@ class YoloLoader():
                     annotator.box_label(
                         bbox, f'{self.names[int(cls)]} {conf:.2f}', color=colors(int(cls), True))
         return image
+
+

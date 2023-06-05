@@ -7,3 +7,5 @@ ultralytics==8.0.110
 psutil==5.9.5
 tqdm==4.65.0
 transformers==4.29.2
+easydict==1.10
+filterpy==1.4.5
