@@ -176,7 +176,8 @@ def box_iou(boxes1, boxes2):
     return iou, union
 
 ### plotting function ###
-def plot_image(img, det_res, font_size, labels):
+def plot_image(img, det_res, font_size, labels, flag=False):
+
     # plotting
     annotator = Annotator(img, line_width=font_size, example=labels)
     for _, res in enumerate(det_res):
@@ -185,7 +186,12 @@ def plot_image(img, det_res, font_size, labels):
         cls = res[5].item()
         object_id = res[6].item()
         label_text =  labels[int(cls)]
-        color = (0, 0, 255) if cls == 0 else (255, 255, 0)
+        if (flag) and (cls == 0):
+            color = (255, 0, 0)
+        elif cls == 0:
+            color = (0, 255, 0) 
+        else:
+            color = (255, 255, 0)
         annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
 
 ### object tracker ###
