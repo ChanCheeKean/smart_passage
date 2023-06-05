@@ -1,7 +1,7 @@
 video:
   # source: "./static/test_video/test.mp4"
-  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  source: "./static/backup/luggage.mp4"
+  source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  # source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
   output_file_name: "./static/test_video/saved_output.avi"
@@ -36,9 +36,8 @@ model:
     - "baggage"
     # - "box"
     - "stroller"
-
-    # - "chair" 
     - "trolley"
+    # - "chair" 
     # - "object"
     # - 0
     # - 2
