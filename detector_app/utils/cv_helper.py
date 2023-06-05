@@ -35,12 +35,12 @@ def plot_gate_roi(img):
     )
 
     # test
-    # top = 280
-    # left = 140
+    # top, left = 280, 140
+    # width, height = 850, 350
     # cv2.rectangle(
     #     img,
     #     (left, top),
-    #     (left + 850, top + 350),
+    #     (left + width, top + height),
     #     (255, 0, 255), 
     #     2
     # )
