@@ -45,7 +45,7 @@ def plot_gate_roi(img):
     #     2
     # )
 
-def check_roi(box, gate_xyxy, in_safety=False):
+def check_roi(box, in_safety=False):
     '''Qualifier Criteria: Check if object is in the region of Interest and also within size limit
     '''
     center = (box[0] + box[2]) / 2
@@ -53,53 +53,21 @@ def check_roi(box, gate_xyxy, in_safety=False):
     height = box[3] - box[1]
 
     in_safe = (center < gate_xyxy['right-safety']) and (center > gate_xyxy['left-safety']) 
-    in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['top'])
-    in_size = (width < 750) | (height < 250)
+    in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
+
+    # to remove overly big object
+    in_size = (width < 400) | (height < 250) | (box[5] == 0)
 
     if in_safety:
         return in_roi and in_safe and in_size
     else:
         return in_roi and in_size
-    
-def determine_zone(det):
-    '''check the zone of the passanger or object'''
-    center = (det[0] + det[1]) / 2
-    if center < gate_xyxy['left-safety']:
-        return 'left'
-    elif center > gate_xyxy['right-safety']:
-        return 'right'
-    else:
-        return 'safety'
-    
-def update_info(dets):
-    info_dict = {
-        'human_count' : 0, 
-        'human_left' : 0,
-        'human_safety': 0,
-        'human_right': 0,
-        'object_left' : 0,
-        'object_safety': 0,
-        'object_right': 0,
-        'tailgate_flag': False,
-        'antidir_flag': False,
-    }
-    
-    for det in dets:
-        cls = det[5].item()
-        object_id = det[6].item()
-        zone = determine_zone(det)
-        
-        if cls == 0:
-            info_dict['human_count'] += 1
-            info_dict[f'human_{zone}'] += 1
-        else:
-            info_dict[f'object_{zone}'] += 1
-
-        return info_dict
 
 ### tailgate detection ###
-def tailgating_detection(img, detections, trigger_distance):
+def tailgating_detection(detections, trigger_distance):
     human_detection_in_gate = []
+    detections = [det for det in detections if det[5].item() == 0]
+
     for det in detections:
         if (check_roi(det, in_safety=True)):
             human_detection_in_gate.append(det)
@@ -108,23 +76,8 @@ def tailgating_detection(img, detections, trigger_distance):
         for _, human_j in enumerate(human_detection_in_gate[:i] + human_detection_in_gate[(i + 1):]):
             if human_i[0] < human_j[0]: # human i is on the left
                 if human_j[0] - human_i[2] < trigger_distance:
-                    # red box for tailgaters
-                    # cv2.rectangle(
-                    #     img,
-                    #     (int(human_i[0]), int(human_i[1])),
-                    #     (int(human_i[2]), int(human_i[3])),
-                    #     (0, 0, 255), 
-                    #     3
-                    # )
-                    # cv2.rectangle(
-                    #     img,
-                    #     (int(human_j[0]), int(human_j[1])),
-                    #     (int(human_j[2]), int(human_j[3])),
-                    #     (0, 0, 255), 
-                    #     3
-                    # )
-                    return True
-    return False
+                    return 1
+    return 0
 
 ### update metadata ###
 def update_object_dict(detect_dict, warning_flag, oversize_flag, antidir_flag, object_count_list):
@@ -176,22 +129,26 @@ def box_iou(boxes1, boxes2):
     return iou, union
 
 ### plotting function ###
-def plot_image(img, det_res, font_size, labels, flag=False):
+def plot_image(img, det_res, font_size, labels, mm_per_pixel, flag=False):
 
     # plotting
     annotator = Annotator(img, line_width=font_size, example=labels)
     for _, res in enumerate(det_res):
         bbox = [round(i, 2) for i in res[:4].tolist()]
         conf = round(res[4].item(), 3)
-        cls = res[5].item()
-        object_id = res[6].item()
-        label_text =  labels[int(cls)]
-        if (flag) and (cls == 0):
-            color = (255, 0, 0)
-        elif cls == 0:
-            color = (0, 255, 0) 
+        obj_cls = res[5].item()
+
+        object_id = res[6].item() if obj_cls == 0 \
+            else f"H:{int((res[3] - res[1]) * mm_per_pixel)}mm W:{int((res[2] - res[0]) * mm_per_pixel)}mm"
+
+        label_text =  labels[int(obj_cls)]
+
+        if (flag) and (obj_cls == 0):
+            color = (100, 0, 0)
+        elif obj_cls == 0:
+            color = (0, 100, 0) 
         else:
-            color = (255, 255, 0)
+            color = (0, 0, 0)
         annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
 
 ### object tracker ###
@@ -211,7 +168,7 @@ class DeepSortTracker():
 
     def update(self, image, det):
         with torch.no_grad():
-            outputs = torch.Tensor(self.deep_tracker.update(det.to(self.device), image))
+            outputs = torch.Tensor(self.deep_tracker.update(det.cpu(), image))
             outputs[:, [-3, -1]] = outputs[:, [-1, -3]]
         return outputs
 
@@ -247,10 +204,10 @@ class VitModelLoader():
         # only include tensor in roi and >confidence level
         lis = []
         for ind, res in enumerate(results):
-            cls = res[5].item()
-            threshold = self.conf_thres + 0.1 if cls == 0 else self.conf_thres
+            obj_cls = res[5].item()
+            threshold = self.conf_thres + 0.1 if obj_cls == 0 else self.conf_thres
             conf = round(res[4].item(), 3)
-            if (check_roi(res, gate_xyxy, in_safety=False)) and (conf > threshold):
+            if (check_roi(res, in_safety=False)) and (conf > threshold):
                 lis.append(ind)
         results = results[lis, :]
 
@@ -258,7 +215,7 @@ class VitModelLoader():
         lis = []
         if self.iou_thres < 1.0:
             # split class for human and object
-            conditions = [results[:, 5] == 0, results[:, 5] != 0]
+            # conditions = [results[:, 5] == 0, results[:, 5] != 0]
             conditions = [results[:, 5] != 100]
             for i in range(len(conditions)):
                 res = results[(conditions[i]) & (results[:, 4] > 0)]
@@ -317,9 +274,9 @@ class YoloLoader():
                 for _, (output) in enumerate(det):
                     bbox = output[0:4]
                     conf = output[4]
-                    cls = output[5]
+                    obj_cls = output[5]
                     annotator.box_label(
-                        bbox, f'{self.names[int(cls)]} {conf:.2f}', color=colors(int(cls), True))
+                        bbox, f'{self.names[int(obj_cls)]} {conf:.2f}', color=colors(int(obj_cls), True))
         return image
 
 

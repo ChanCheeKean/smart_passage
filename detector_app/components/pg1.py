@@ -7,7 +7,8 @@ import dash_daq as daq
 from app import server, app
 from components import pg1_callback
 from utils.video_loader import ImageLoader
-from utils.cv_helper import DeepSortTracker, VitModelLoader, plot_gate_roi, plot_image, update_info
+from utils.cv_helper import DeepSortTracker, VitModelLoader, plot_gate_roi, plot_image, tailgating_detection
+from utils.logger import update_info
 
 ### video streaming ###
 def video_gen(camera, model, object_tracker):
@@ -22,8 +23,17 @@ def video_gen(camera, model, object_tracker):
             results = object_tracker.update(image, results)
 
             # plotting
-            plot_image(image, results, camera.font_size, model.labels)
+            plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel)
+            
+            # update info, track id and direction
+            camera.passenger_count, camera.id_paid, camera.id_complete, info_dict = update_info(
+                camera.passenger_count, camera.id_paid, camera.id_complete, results
+            )
 
+            # tailgate detection
+            tailgate_flag = tailgating_detection(results, camera.trigger_distance)
+            info_dict['tailgate_flag'] = tailgate_flag
+            
             # plot roi area
             if camera.plot_roi:
                 plot_gate_roi(image)
@@ -31,15 +41,14 @@ def video_gen(camera, model, object_tracker):
             # save video
             if camera.save_video:
                 camera.out_writter.write(image)
-            
-            # log the info
-            info_dict = update_info(results)
+
+            # log info
             with open('./static/json/image_output.json', 'w') as f:
                 json.dump(info_dict, f)
 
             # capture image if violation
-            # if (info_dict['tailgate_flag'] == 1) | (info_dict['antidir_flag'] == 1):
-                # cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
+            if (info_dict['tailgate_flag'] == 1) | (info_dict['antidir_flag'] == 1):
+                cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
 
             _, jpeg = cv2.imencode('.jpg', image)
             frame = jpeg.tobytes()
