@@ -7,8 +7,15 @@ import dash_daq as daq
 from app import server, app
 from components import pg1_callback
 from utils.video_loader import ImageLoader
-from utils.cv_helper import DeepSortTracker, VitModelLoader, plot_gate_roi, plot_image, tailgating_detection
-from utils.logger import update_info
+from utils.cv_helper import (
+    DeepSortTracker, 
+    VitModelLoader, 
+    plot_gate_roi, 
+    plot_image, 
+    tailgating_detection, 
+    update_zone_info, 
+    detect_dir,
+)
 
 ### video streaming ###
 def video_gen(camera, model, object_tracker):
@@ -21,18 +28,25 @@ def video_gen(camera, model, object_tracker):
             # detect and tracking
             results = model.detect(image)
             results = object_tracker.update(image, results)
-
-            # plotting
-            plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel)
             
-            # update info, track id and direction
-            camera.passenger_count, camera.id_paid, camera.id_complete, info_dict = update_info(
-                camera.passenger_count, camera.id_paid, camera.id_complete, results
-            )
+            # update zone in the dictionaries
+            info_dict = update_zone_info(results)
 
             # tailgate detection
             tailgate_flag = tailgating_detection(results, camera.trigger_distance)
             info_dict['tailgate_flag'] = tailgate_flag
+
+            # anti detection
+            anti_flag, camera.id_paid, camera.id_complete = detect_dir(
+                results, camera.id_paid, camera.id_complete, paid_zone='right')
+            info_dict['antidir_flag'] = anti_flag
+
+            # update passenger count
+            camera.passenger_count = len(camera.id_complete)
+
+            # plotting
+            flag = any(anti_flag, tailgate_flag)
+            plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag=flag)
             
             # plot roi area
             if camera.plot_roi:
@@ -111,7 +125,6 @@ archive_card = dbc.Card(
     ],
     className='card'
 )
-
 
 ### object count container ###
 count_container = dbc.Row(
@@ -192,7 +205,6 @@ count_container = dbc.Row(
                       style={'height' : '20vh'},
                       className='pt-3'
                   )
-
 
 ### final layout ###
 layout = html.Div(

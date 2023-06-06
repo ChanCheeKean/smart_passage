@@ -1,1 +1,1 @@
-{"human_count": 0, "human_left": 0, "human_safety": 0, "human_right": 0, "object_left": 0, "object_safety": 0, "object_right": 0, "tailgate_flag": 0, "antidir_flag": 0}
+{"human_gate_count": 1, "human_left": 0, "human_safety": 0, "human_right": 1, "object_left": 0, "object_safety": 0, "object_right": 0, "tailgate_flag": 0, "antidir_flag": 0, "passenger_count": 0}

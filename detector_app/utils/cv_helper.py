@@ -14,8 +14,37 @@ from trackers.multi_tracker_zoo import create_tracker
 ### gate roi ###
 gate_xyxy = config['gate_roi']
 
+def determine_zone(det):
+    '''check the zone of the passanger or object according to the config roi'''
+    center = (det[0] + det[2]) / 2
+    if center < gate_xyxy['left-safety']:
+        return 'left'
+    elif center > gate_xyxy['right-safety']:
+        return 'right'
+    else:
+        return 'safety'
+    
+def check_roi(box, in_safety=False):
+    '''Check if object is in the region of Interest and also within size limit
+    in_safety: to check if the object is within the safety zone
+    '''
+    center = (box[0] + box[2]) / 2
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+
+    in_safe = (center < gate_xyxy['right-safety']) and (center > gate_xyxy['left-safety']) 
+    in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
+
+    # to remove overly big object
+    in_size = (width < 600) | (height < 400) | (box[5] == 0)
+
+    if in_safety:
+        return in_roi and in_safe and in_size
+    else:
+        return in_roi and in_size
+
 def plot_gate_roi(img):
-    '''Draw the zone border in the image'''
+    '''Draw zone border in image'''
     # gate roi
     cv2.rectangle(
         img,
@@ -45,26 +74,9 @@ def plot_gate_roi(img):
     #     2
     # )
 
-def check_roi(box, in_safety=False):
-    '''Qualifier Criteria: Check if object is in the region of Interest and also within size limit
-    '''
-    center = (box[0] + box[2]) / 2
-    width = box[2] - box[0]
-    height = box[3] - box[1]
-
-    in_safe = (center < gate_xyxy['right-safety']) and (center > gate_xyxy['left-safety']) 
-    in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
-
-    # to remove overly big object
-    in_size = (width < 400) | (height < 250) | (box[5] == 0)
-
-    if in_safety:
-        return in_roi and in_safe and in_size
-    else:
-        return in_roi and in_size
-
 ### tailgate detection ###
 def tailgating_detection(detections, trigger_distance):
+    '''return tailgate flag if >1 passengers in safety zone, depends on trigger distance'''
     human_detection_in_gate = []
     detections = [det for det in detections if det[5].item() == 0]
 
@@ -79,42 +91,62 @@ def tailgating_detection(detections, trigger_distance):
                     return 1
     return 0
 
+### anti direction ###
+def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
+    '''return anti direction flag and update recorded passenger id'''
+    anti_flag = 0
+    detections = [det for det in detections if det[5].item() == 0]
+    for det in detections:
+        zone = determine_zone(det)
+        obj_id = det[6].item()
+        if zone == paid_zone:
+            if obj_id not in id_paid:
+                id_paid.append(obj_id)
+        elif (zone != paid_zone) & (zone != 'safety'):
+            if (obj_id in id_paid) and (obj_id not in id_complete):
+                id_complete.append(obj_id)
+            elif obj_id not in id_paid:
+                anti_flag = 1
+
+    return anti_flag, id_paid, id_complete
+
 ### update metadata ###
-def update_object_dict(detect_dict, warning_flag, oversize_flag, antidir_flag, object_count_list):
-    '''update object count in each zone'''
+def update_zone_info(dets):
+    '''determine zone and combine the info to be displayed in dashboard'''
+    info_dict = {
+        'human_gate_count' : 0, 
+        'human_left' : 0,
+        'human_safety': 0,
+        'human_right': 0,
+        'object_left' : 0,
+        'object_safety': 0,
+        'object_right': 0,
+        'tailgate_flag': 0,
+        'antidir_flag': 0,
+        'passenger_count' : 0, 
+    }
 
-    for _object in object_count_list:
-        if _object['type'] == 'human':
-
-            detect_dict['human_count'] += 1
-            detect_dict[f'human_{_object["zone"]}'] += 1
-
-        elif _object['type'] == 'object':
-            detect_dict[f'object_{_object["zone"]}'] = 1
-
-    detect_dict['oversize_flag'] = 1 if oversize_flag else -1
-    detect_dict['antidir_flag'] = 1 if antidir_flag else -1
-
-    if warning_flag:
-        detect_dict['tailgate_flag'] = 1 
-    elif detect_dict['human_count'] > 0:
-        detect_dict['tailgate_flag'] = 0
-    else: 
-        detect_dict['tailgate_flag'] = -1
-    return detect_dict
+    for det in dets:
+        obj_cls = det[5].item()
+        zone = determine_zone(det)
+        if obj_cls == 0:
+            info_dict['human_gate_count'] += 1
+            info_dict[f'human_{zone}'] += 1
+        else:
+            info_dict[f'object_{zone}'] = 1
+    return info_dict
 
 ### non max suppression ###
 def box_iou(boxes1, boxes2):
+    '''return the iou area of 2 boxes'''
     def _upcast(t):
-        # Protects from numerical overflows in multiplications by upcasting to the equivalent higher type
+        '''protects from numerical overflows in multiplications by upcasting to the equivalent higher type'''
         if t.is_floating_point():
             return t if t.dtype in (torch.float32, torch.float64) else t.float()
         else:
             return t if t.dtype in (torch.int32, torch.int64) else t.int()
     def box_area(boxes):
-        """
-        Computes the area of a set of bounding boxes, which are specified by its (x1, y1, x2, y2) coordinates.
-        """
+        '''computes the area of a set of bounding boxes, which are specified by its (x1, y1, x2, y2) coordinates'''
         boxes = _upcast(boxes)
         return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
 
@@ -130,8 +162,8 @@ def box_iou(boxes1, boxes2):
 
 ### plotting function ###
 def plot_image(img, det_res, font_size, labels, mm_per_pixel, flag=False):
-
-    # plotting
+    '''plot detection boxes in the image'''
+    
     annotator = Annotator(img, line_width=font_size, example=labels)
     for _, res in enumerate(det_res):
         bbox = [round(i, 2) for i in res[:4].tolist()]
@@ -227,7 +259,6 @@ class VitModelLoader():
                 lis.append(res)
         results = torch.cat(lis, dim=0)
         results = results[results[:, 4] > 0]
-
         return results
 
 ### Yolo Model ###
