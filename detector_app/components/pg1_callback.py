@@ -46,7 +46,7 @@ def update_output(intervals, n):
 def update_output(n):
     files = os.listdir("./static/img/")
     if files:
-        sort_files = sorted([f.split('.')[0] for f in files], reverse=True)
+        sort_files = sorted([f.split('.')[0] for f in files if "jpg" in f], reverse=True)
         child_list = []
         time.sleep(0.5)
 
