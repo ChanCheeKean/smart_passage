@@ -5,7 +5,7 @@ video:
   plot_roi: True
   model_detect: True
   output_file_name: "./static/test_video/passenger.avi"
-  font_size: 2
+  font_size: 3
   mm_per_pixel: 1.85
   trigger_distance: 100
   stay_limit: 5
