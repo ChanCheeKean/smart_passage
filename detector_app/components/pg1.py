@@ -47,13 +47,13 @@ def video_gen(camera, model, object_tracker):
             # update passenger count
             info_dict['passenger_count'] = len(camera.id_complete)
 
-            # loitering 
+            # loitering
             loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
             info_dict['loiter_flag'] = loiter_flag
             info_dict['loiter_lis'] = lis
 
             # plotting
-            flag = any(anti_flag, tailgate_flag, loiter_flag)
+            flag = any((anti_flag, tailgate_flag, loiter_flag))
             plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag)
             
             # plot roi area

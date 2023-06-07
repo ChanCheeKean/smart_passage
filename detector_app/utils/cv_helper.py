@@ -1,6 +1,6 @@
 import cv2
 import torch
-from time import time
+import time
 from pathlib import Path
 from utils.config_loader import config
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
@@ -37,7 +37,7 @@ def check_roi(box, in_safety=False):
     in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
 
     # to remove overly big object
-    in_size = (width < 600) | (height < 400) | (box[5] == 0)
+    in_size = ((width * height)< 220000) | (box[5] == 0)
 
     if in_safety:
         return in_roi and in_safe and in_size
@@ -99,7 +99,6 @@ def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
     '''return anti direction flag and update recorded passenger id'''
     anti_flag = 0
     lis = []
-
     detections = [det for det in detections if det[5].item() == 0]
     for det in detections:
         zone = determine_zone(det)
@@ -189,10 +188,12 @@ def box_iou(boxes1, boxes2):
     return iou, union
 
 ### plotting function ###
-def plot_image(img, det_res, font_size, labels, mm_per_pixel, flag=False):
+def plot_image(img, detections, font_size, labels, mm_per_pixel, flag=False, plot_cat=False):
     '''plot detection boxes in the image'''
-
     annotator = Annotator(img, line_width=font_size, example=labels)
+    det_res = [det for det in detections if det[5].item() not in [1, 2]]
+    det_res_cat = [det for det in detections if det[5].item() not in [1, 2]]
+
     for _, res in enumerate(det_res):
         bbox = [round(i, 2) for i in res[:4].tolist()]
         conf = round(res[4].item(), 3)
@@ -202,14 +203,24 @@ def plot_image(img, det_res, font_size, labels, mm_per_pixel, flag=False):
             else f"H:{int((res[3] - res[1]) * mm_per_pixel)}mm W:{int((res[2] - res[0]) * mm_per_pixel)}mm"
 
         label_text =  labels[int(obj_cls)]
-
         if (flag) and (obj_cls == 0):
-            color = (100, 0, 0)
+            color = (0, 0, 100)
         elif obj_cls == 0:
             color = (0, 100, 0) 
         else:
-            color = (0, 0, 0)
+            color = (100, 100, 100)
         annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
+
+    # to plot eldery and kid
+    if plot_cat:
+        for _, res in enumerate(det_res_cat):
+            bbox = [round(i, 2) for i in res[:4].tolist()]
+            conf = round(res[4].item(), 3)
+            obj_cls = res[5].item()
+            object_id = res[6].item() 
+            label_text =  labels[int(obj_cls)]
+            color = (133, 3, 109)
+            annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
 
 ### object tracker ###
 class DeepSortTracker():
@@ -261,7 +272,7 @@ class VitModelLoader():
             tensors=(results["boxes"], results["scores"].view(-1, 1), results["labels"].view(-1, 1)),
             dim=1)
         
-        # only include tensor in roi and >confidence level
+        # only include tensor in roi, >confidence level
         lis = []
         for ind, res in enumerate(results):
             obj_cls = res[5].item()

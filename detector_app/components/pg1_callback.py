@@ -16,7 +16,7 @@ from app import app
     Input("pg1_interval_xs", "n_intervals"),
     Input("pg1_clear_warning_bt", "n_clicks"),
 )
-def update_output(n):
+def update_output(intervals, n):
     ### if button clicked, clear warning light and images ###
     if callback_context.triggered_id == 'pg1_clear_warning_bt':
         if os.listdir("./static/img/"):

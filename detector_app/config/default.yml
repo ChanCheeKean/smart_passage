@@ -32,6 +32,8 @@ model:
   agnostic_nms: False
   classes: 
     - "person"
+    - "old folk"
+    - "kid"
     - "suitcase"
     - "wheelchair"
     - "luggage"
@@ -39,8 +41,8 @@ model:
     - "box"
     - "stroller"
     - "trolley"
-    # - "chair" 
     - "object"
+    # - "chair" 
     # - 0
     # - 2
     # - 9
