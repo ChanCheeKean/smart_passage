@@ -8,7 +8,7 @@ video:
   font_size: 3
   mm_per_pixel: 1.85
   trigger_distance: 100
-  stay_limit: 5
+  stay_limit: 3
   img_sz:
   - 1280
   - 720
