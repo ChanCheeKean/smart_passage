@@ -74,6 +74,7 @@ class ImageLoader(object):
         self.font_size = video_config['font_size']
         self.mm_per_pixel = video_config['font_size']
         self.trigger_distance = video_config['trigger_distance']
+        self.stay_limit = video_config['stay_limit']
         self.out_writter = cv2.VideoWriter(
             self.output_file_name, 
             cv2.VideoWriter_fourcc('M','J','P','G'), 
@@ -84,6 +85,7 @@ class ImageLoader(object):
         self.video_loader = cv2.VideoCapture(self.source)
         self.id_paid = []
         self.id_complete = []
+        self.id_stay = {}
         self.passenger_count = 0
 
         # skip some frames and jump

@@ -1,5 +1,6 @@
 import cv2
 import torch
+from time import time
 from pathlib import Path
 from utils.config_loader import config
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
@@ -79,6 +80,7 @@ def tailgating_detection(detections, trigger_distance):
     '''return tailgate flag if >1 passengers in safety zone, depends on trigger distance'''
     human_detection_in_gate = []
     detections = [det for det in detections if det[5].item() == 0]
+    lis = []
 
     for det in detections:
         if (check_roi(det, in_safety=True)):
@@ -88,13 +90,16 @@ def tailgating_detection(detections, trigger_distance):
         for _, human_j in enumerate(human_detection_in_gate[:i] + human_detection_in_gate[(i + 1):]):
             if human_i[0] < human_j[0]: # human i is on the left
                 if human_j[0] - human_i[2] < trigger_distance:
-                    return 1
-    return 0
+                    lis = [human_j[5].item(), human_i[5].item()]
+                    return 1, lis
+    return 0, lis
 
 ### anti direction ###
 def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
     '''return anti direction flag and update recorded passenger id'''
     anti_flag = 0
+    lis = []
+
     detections = [det for det in detections if det[5].item() == 0]
     for det in detections:
         zone = determine_zone(det)
@@ -107,8 +112,27 @@ def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
                 id_complete.append(obj_id)
             elif obj_id not in id_paid:
                 anti_flag = 1
+                lis.append(obj_id)
 
-    return anti_flag, id_paid, id_complete
+    return anti_flag, id_paid, id_complete, lis
+
+### loitering ###
+def detect_loiter(detections, id_stay, stay_limit=5):
+    loiter_flag = 0
+    detections = [det for det in detections if det[5].item() == 0]
+    lis = []
+
+    for det in detections:
+        obj_id = det[6].item()
+        if obj_id not in id_stay:
+            id_stay[obj_id] = int(time.time())
+        else:
+            stay_time = int(time.time()) - id_stay.get(obj_id, 0)
+            if stay_time > stay_limit:
+                loiter_flag = 1
+                lis.append(obj_id)
+    
+    return loiter_flag, lis
 
 ### update metadata ###
 def update_zone_info(dets):
@@ -123,6 +147,10 @@ def update_zone_info(dets):
         'object_right': 0,
         'tailgate_flag': 0,
         'antidir_flag': 0,
+        'loiter_flag': 0,
+        'tailgate_list': [],
+        'anti_list': [],
+        'loiter_list': [],
         'passenger_count' : 0, 
     }
 
@@ -163,7 +191,7 @@ def box_iou(boxes1, boxes2):
 ### plotting function ###
 def plot_image(img, det_res, font_size, labels, mm_per_pixel, flag=False):
     '''plot detection boxes in the image'''
-    
+
     annotator = Annotator(img, line_width=font_size, example=labels)
     for _, res in enumerate(det_res):
         bbox = [round(i, 2) for i in res[:4].tolist()]

@@ -15,6 +15,7 @@ from utils.cv_helper import (
     tailgating_detection, 
     update_zone_info, 
     detect_dir,
+    detect_loiter,
 )
 
 ### video streaming ###
@@ -33,20 +34,27 @@ def video_gen(camera, model, object_tracker):
             info_dict = update_zone_info(results)
 
             # tailgate detection
-            tailgate_flag = tailgating_detection(results, camera.trigger_distance)
+            tailgate_flag, lis = tailgating_detection(results, camera.trigger_distance)
             info_dict['tailgate_flag'] = tailgate_flag
+            info_dict['tailgate_lis'] = lis
 
             # anti detection
-            anti_flag, camera.id_paid, camera.id_complete = detect_dir(
+            anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
                 results, camera.id_paid, camera.id_complete, paid_zone='right')
             info_dict['antidir_flag'] = anti_flag
+            info_dict['antidir_lis'] = lis
 
             # update passenger count
-            camera.passenger_count = len(camera.id_complete)
+            info_dict['passenger_count'] = len(camera.id_complete)
+
+            # loitering 
+            loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
+            info_dict['loiter_flag'] = loiter_flag
+            info_dict['loiter_lis'] = lis
 
             # plotting
-            flag = any(anti_flag, tailgate_flag)
-            plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag=flag)
+            flag = any(anti_flag, tailgate_flag, loiter_flag)
+            plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag)
             
             # plot roi area
             if camera.plot_roi:
