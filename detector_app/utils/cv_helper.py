@@ -37,7 +37,7 @@ def check_roi(box, in_safety=False):
     in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
 
     # to remove overly big object
-    in_size = ((width * height)< 220000) | (box[5] == 0)
+    in_size = ((width * height)< 150000) | (box[5] == 0)
 
     if in_safety:
         return in_roi and in_safe and in_size
