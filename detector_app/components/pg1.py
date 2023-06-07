@@ -120,8 +120,8 @@ indicator_container = html.Div(
         dbc.Button(
             children="Clear Alert", 
             id='pg1_clear_warning_bt',
-            outline=True, 
-            disabled=True,
+            outline=False, 
+            disabled=False,
             color="danger", 
             size="lg", 
             className="ps-2 mt-4 mx-auto",

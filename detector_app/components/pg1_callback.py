@@ -48,7 +48,7 @@ def update_output(n):
     if files:
         sort_files = sorted([f.split('.')[0] for f in files if "jpg" in f], reverse=True)
         child_list = []
-        time.sleep(0.5)
+        time.sleep(0.8)
 
         # display image in dashboard
         for f in  sort_files[:8]:
