@@ -1,3 +1,4 @@
+import os, glob
 import cv2
 import time, json
 from flask import Response
@@ -17,6 +18,12 @@ from utils.cv_helper import (
     detect_dir,
     detect_loiter,
 )
+
+### clear images before start ###
+if os.listdir("./static/img/"):
+    files = glob.glob('./static/img/*')
+    for f in files:
+        os.remove(f)
 
 ### video streaming ###
 def video_gen(camera, model, object_tracker):
@@ -69,7 +76,7 @@ def video_gen(camera, model, object_tracker):
                 json.dump(info_dict, f)
 
             # capture image if violation
-            if (info_dict['tailgate_flag'] == 1) | (info_dict['antidir_flag'] == 1):
+            if flag:
                 cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
 
             _, jpeg = cv2.imencode('.jpg', image)
@@ -218,7 +225,7 @@ count_container = dbc.Row(
 layout = html.Div(
     children = [
         dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
-        dcc.Interval(id='pg1_interval_1', interval=1.8*1000, n_intervals=0),
+        dcc.Interval(id='pg1_interval_1s', interval=1.5*1000, n_intervals=0),
         html.H2("SmartGate Passage", className='text-info text-center my-1 fs-1'),
         dbc.Row(
             children=[
