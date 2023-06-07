@@ -5,7 +5,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from app import server, app
-# from components import pg1_callback
+from components import pg1_callback
 from utils.video_loader import ImageLoader
 from utils.cv_helper import (
     DeepSortTracker, 
@@ -217,16 +217,16 @@ count_container = dbc.Row(
 ### final layout ###
 layout = html.Div(
     children = [
-        # dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
-        # dcc.Interval(id='pg1_interval_1', interval=1.8*1000, n_intervals=0),
+        dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
+        dcc.Interval(id='pg1_interval_1', interval=1.8*1000, n_intervals=0),
         html.H2("SmartGate Passage", className='text-info text-center my-1 fs-1'),
-        # dbc.Row(
-        #     children=[
-        #         dbc.Col(indicator_container, width=1),
-        #         dbc.Col([video_container, count_container], width=8),
-        #         dbc.Col(archive_card, width=3),
-        #         ],
-        #     className='my-3 mx-2'),
+        dbc.Row(
+            children=[
+                dbc.Col(indicator_container, width=1),
+                dbc.Col([video_container, count_container], width=8),
+                dbc.Col(archive_card, width=3),
+                ],
+            className='my-3 mx-2'),
     ]
 )
 
