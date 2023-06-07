@@ -73,8 +73,11 @@ def video_gen(camera, model, object_tracker):
                 camera.out_writter.write(image)
 
             # log info
-            with open('./static/json/image_output.json', 'w') as f:
-                json.dump(info_dict, f)
+            try:
+                with open('./static/json/image_output.json', 'w') as f:
+                    json.dump(info_dict, f)
+            except:
+                pass
 
             # capture image if violation
             if flag:
