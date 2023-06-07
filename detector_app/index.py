@@ -1,8 +1,8 @@
 from app import app
-from components.pg1 import layout
+# from components.pg1 import layout
+# app.layout = layout
 
 from dash import html, dcc
-
 app.layout = html.Div()
 
 if __name__ == '__main__':
