@@ -63,6 +63,10 @@ def video_gen(camera, model, object_tracker):
                 # plotting
                 flag = any((anti_flag, tailgate_flag, loiter_flag))
                 plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag)
+
+                # capture image if violation
+                if flag:
+                    cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
                 
             # plot roi area
             if camera.plot_roi:
@@ -78,10 +82,6 @@ def video_gen(camera, model, object_tracker):
                     json.dump(info_dict, f)
             except:
                 pass
-
-            # capture image if violation
-            if flag:
-                cv2.imwrite(f"./static/img/{int(time.time())}.jpg", image)
 
             _, jpeg = cv2.imencode('.jpg', image)
             frame = jpeg.tobytes()
