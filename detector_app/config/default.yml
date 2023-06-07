@@ -1,8 +1,9 @@
 video:
   # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  source: "./static/backup/box.mp4"
+  source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
+  model_detect: True
   output_file_name: "./static/test_video/saved_output.avi"
   font_size: 2
   mm_per_pixel: 1.85
