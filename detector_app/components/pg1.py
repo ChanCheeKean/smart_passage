@@ -5,7 +5,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from app import server, app
-from components import pg1_callback
+# from components import pg1_callback
 from utils.video_loader import ImageLoader
 from utils.cv_helper import (
     DeepSortTracker, 
