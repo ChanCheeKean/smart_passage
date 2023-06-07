@@ -1,10 +1,10 @@
 video:
   # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
   source: "./static/backup/luggage.mp4"
-  save_video: False
+  save_video: True
   plot_roi: False
-  model_detect: True
-  output_file_name: "./static/test_video/saved_output.avi"
+  model_detect: False
+  output_file_name: "./static/test_video/passenger.avi"
   font_size: 2
   mm_per_pixel: 1.85
   trigger_distance: 100
