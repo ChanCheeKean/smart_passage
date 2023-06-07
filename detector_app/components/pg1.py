@@ -220,13 +220,13 @@ layout = html.Div(
         dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
         dcc.Interval(id='pg1_interval_1', interval=1.8*1000, n_intervals=0),
         html.H2("SmartGate Passage", className='text-info text-center my-1 fs-1'),
-        dbc.Row(
-            children=[
-                dbc.Col(indicator_container, width=1),
-                dbc.Col([video_container, count_container], width=8),
-                dbc.Col(archive_card, width=3),
-                ],
-            className='my-3 mx-2'),
+        # dbc.Row(
+        #     children=[
+        #         dbc.Col(indicator_container, width=1),
+        #         dbc.Col([video_container, count_container], width=8),
+        #         dbc.Col(archive_card, width=3),
+        #         ],
+        #     className='my-3 mx-2'),
     ]
 )
 
