@@ -1,0 +1,7 @@
+train: ./processed/train/images
+val: ./processed/valid/images
+# test: ./processed/test/images
+
+nc: 3
+# names: ['person', 'child', 'peopleWithwheelchair', 'wheelchair', 'luggage', 'cardboard']
+names: ['person', 'peopleWithwheelchair', 'wheelchair', 'luggage', 'cardboard']

@@ -1,6 +1,7 @@
 video:
   # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  source: "./static/backup/luggage.mp4"
+  # source: "./static/backup/luggage.mp4"
+  source: "./static/backup/loitering.jpg"
   save_video: False
   plot_roi: False
   model_detect: True

@@ -192,7 +192,7 @@ def plot_image(img, detections, font_size, labels, mm_per_pixel, flag=False, plo
     '''plot detection boxes in the image'''
     annotator = Annotator(img, line_width=font_size, example=labels)
     det_res = [det for det in detections if det[5].item() not in [1, 2]]
-    det_res_cat = [det for det in detections if det[5].item() not in [1, 2]]
+    det_res_cat = [det for det in detections if det[5].item() in [1, 2]]
 
     for _, res in enumerate(det_res):
         bbox = [round(i, 2) for i in res[:4].tolist()]
@@ -246,7 +246,8 @@ class DeepSortTracker():
 ### OWL-Vit Model ###
 class VitModelLoader():
     def __init__(self):
-        '''OWL-Vit model to detect and plot the image'''
+        '''
+        OWL-Vit model to detect and plot the image'''
         model_config = config['model']
         self.img_sz = config['video']['img_sz']
         self.conf_thres = model_config['conf_thres']
@@ -261,6 +262,7 @@ class VitModelLoader():
         self.query = ['photo of a ' + str(label) for label in self.labels]
 
     def detect(self, image):
+        '''torch.Tensor([[xt, yt, xb, yb, conf, cls], [xt, yt, xb, yb, conf, cls], ...])'''
         # pre-processing and inference
         inputs = self.processor(text=[self.query], images=image, return_tensors="pt").to(self.device)
         with torch.no_grad():
@@ -271,7 +273,7 @@ class VitModelLoader():
         results = torch.cat(
             tensors=(results["boxes"], results["scores"].view(-1, 1), results["labels"].view(-1, 1)),
             dim=1)
-        
+            
         # only include tensor in roi, >confidence level
         lis = []
         for ind, res in enumerate(results):

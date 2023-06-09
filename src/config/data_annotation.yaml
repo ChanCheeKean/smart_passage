@@ -1,0 +1,31 @@
+origin: "landing"
+destination: "processed"
+replace_label:
+  luggage_1:
+    0: 3
+  luggage_2:
+    0: 3
+    1: 3
+    2: 0
+    3: 3
+  wheelchair_1:
+    0: 0
+    1: 1
+  wheelchair_2:
+    0: 0
+    1: 1
+    2: 1
+    3: 0
+    4: 2
+  wheelchair_3:
+    0: 0
+    3: 0
+    5: 1
+    'skip':
+      - 1
+      - 2
+      - 4
+  box_2:
+    0: 4
+  box_3:
+    0: 4

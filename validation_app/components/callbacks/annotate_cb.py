@@ -12,7 +12,6 @@ export_data_path = os.path.join(".", "data", "processed")
 if not os.path.exists(export_data_path):
     os.makedirs(export_data_path)
 
-
 ### libraries dropdown ###
 @app.callback(
     [
