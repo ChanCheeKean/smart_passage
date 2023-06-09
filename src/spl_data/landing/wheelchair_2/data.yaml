@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 5
+names: ['people', 'peopleWithWheelchair', 'peoplewithwheelchair', 'person', 'wheelchair']
+
+roboflow:
+  workspace: cheekean-2txlh
+  project: wchair
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/cheekean-2txlh/wchair/dataset/4
