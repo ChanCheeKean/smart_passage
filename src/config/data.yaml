@@ -1,6 +1,6 @@
-train: ./processed/train/images
-val: ./processed/valid/images
-# test: ./processed/test/images
+train: ./spl_data/processed/train/images
+val: ./spl_data/processed/valid/images
+test: ./spl_data/processed/test/images
 
 nc: 3
 # names: ['person', 'child', 'peopleWithwheelchair', 'wheelchair', 'luggage', 'cardboard']
