@@ -38,7 +38,7 @@ def check_roi(box, in_safety=False):
 
     # to remove overly big object
     in_size = ((width * height) < 100000) | (box[5] == 0)
-
+    return True
     if in_safety:
         return in_roi and in_safe and in_size
     else:
@@ -191,18 +191,18 @@ def box_iou(boxes1, boxes2):
 def plot_image(img, detections, font_size, labels, mm_per_pixel, flag=False, plot_cat=False):
     '''plot detection boxes in the image'''
     annotator = Annotator(img, line_width=font_size, example=labels)
-    det_res = [det for det in detections if det[5].item() not in [1, 2]]
-    det_res_cat = [det for det in detections if det[5].item() in [1, 2]]
+    # det_res = [det for det in detections if det[5].item() not in [1, 2]]
+    # det_res_cat = [det for det in detections if det[5].item() in [1, 2]]
 
-    for _, res in enumerate(det_res):
+    for _, res in enumerate(detections):
         bbox = [round(i, 2) for i in res[:4].tolist()]
         conf = round(res[4].item(), 3)
         obj_cls = res[5].item()
 
         object_id = res[6].item() if obj_cls == 0 \
             else f"H:{int((res[3] - res[1]) * mm_per_pixel)}mm W:{int((res[2] - res[0]) * mm_per_pixel)}mm"
-
         label_text =  labels[int(obj_cls)]
+
         if (flag) and (obj_cls == 0):
             color = (0, 0, 100)
         elif obj_cls == 0:
@@ -210,17 +210,6 @@ def plot_image(img, detections, font_size, labels, mm_per_pixel, flag=False, plo
         else:
             color = (100, 100, 100)
         annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
-
-    # to plot eldery and kid
-    if plot_cat:
-        for _, res in enumerate(det_res_cat):
-            bbox = [round(i, 2) for i in res[:4].tolist()]
-            conf = round(res[4].item(), 3)
-            obj_cls = res[5].item()
-            object_id = res[6].item() 
-            label_text =  labels[int(obj_cls)]
-            color = (133, 3, 109)
-            annotator.box_label(bbox, f'{object_id} {label_text} {conf}', color=color)
 
 ### object tracker ###
 class DeepSortTracker():
@@ -307,10 +296,9 @@ class YoloLoader():
     '''yolo model to detect and plot the image'''
     def __init__(self):
         
-        model_config = config['yolo']
+        model_config = config['model']
         self.img_sz = config['video']['img_sz']
         self.device = model_config['device']
-        self.font_size = model_config['font_size']
         self.classes = model_config['classes']
         self.conf_thres = model_config['conf_thres']
         self.iou_thres = model_config['iou_thres']
@@ -322,8 +310,9 @@ class YoloLoader():
         # load model, use FP16 half-precision inference, use OpenCV DNN for ONNX inference 
         # self.model = DetectMultiBackend(
         #     self.model_name, device=self.device, dnn=self.dnn, data='"./yolov5/data/Objects365.yaml"', fp16=self.half)
-        self.model = AutoBackend(self.model_name, device=self.device, dnn=False, fp16=self.half)
+        self.model = AutoBackend(self.model_name, device=self.device, dnn=False, fp16=False)
         self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
+        self.labels = list(self.names.values())
         self.half = False
 
     def detect(self, image):
@@ -337,18 +326,21 @@ class YoloLoader():
         preds = self.model(im, augment=False, visualize=False)
         results = non_max_suppression(
             preds, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms, max_det=self.max_det)
-
-        # Process detections
-        annotator = Annotator(image, line_width=self.font_size, example=str(self.names))
+        
+        # scale box and convert to tensor
+        lis = []
         for _, det in enumerate(results):
-            if det is not None and len(det): 
-                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], image.shape).round()
-                for _, (output) in enumerate(det):
-                    bbox = output[0:4]
-                    conf = output[4]
-                    obj_cls = output[5]
-                    annotator.box_label(
-                        bbox, f'{self.names[int(obj_cls)]} {conf:.2f}', color=colors(int(obj_cls), True))
-        return image
+            det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], image.shape).round()
+            lis.append(det)
+        results = torch.cat(lis, dim=0)
+            
+        # filter out of roi
+        lis = []
+        for ind, det in enumerate(results):
+            if (check_roi(det, in_safety=False)) and (det[4].item()> self.conf_thres):
+                lis.append(ind)
+
+        results = results[lis, :]
+        return results
 
 

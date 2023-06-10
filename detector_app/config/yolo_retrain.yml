@@ -1,0 +1,38 @@
+video:
+  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  source: "./static/backup/luggage.mp4"
+  save_video: False
+  plot_roi: False
+  model_detect: True
+  output_file_name: "./static/test_video/passenger.avi"
+  font_size: 1
+  mm_per_pixel: 1.85
+  trigger_distance: 100
+  stay_limit: 30
+  img_sz:
+  - 640
+  - 640
+gate_roi:
+  left: 40
+  top: 640
+  right: 1250
+  bottom: 680
+  left-safety: 380
+  right-safety : 780
+object_tracker:
+  reid_weights: "./weights/osnet_x0_25_msmt17.pt"
+  tracking_method: "deepocsort" 
+  tracking_config: "./trackers/deepocsort/configs/deepocsort.yaml"
+model:
+  model_name: "./weights/yolov8l_retrain.pt"
+  conf_thres: 0.1
+  iou_thres: 0.5
+  max_det: 1000
+  device: ""
+  agnostic_nms: False
+  classes: 
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
