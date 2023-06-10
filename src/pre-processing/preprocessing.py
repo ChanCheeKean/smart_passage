@@ -9,10 +9,10 @@ config_file = os.path.join(".", "config", "data_annotation.yaml")
 with open(config_file, "r") as stream:
     pull_config = yaml.safe_load(stream)
 replace_dict = pull_config['replace_label']
-export_dir = os.path.join("../", "spl_data", pull_config['destination'])
+export_dir = os.path.join("../", "data", pull_config['destination'])
 
 # to alter the label class in the data
-data_dir = os.path.join("../", "spl_data", pull_config['origin'])
+data_dir = os.path.join("../", "data", pull_config['origin'])
 data_list = list(replace_dict.keys())
 class_dict = {'train': {}, 'valid': {}, 'test': {}}
 
