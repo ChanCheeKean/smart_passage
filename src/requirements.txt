@@ -4,3 +4,4 @@ opencv-python==4.7.0.72
 super-gradients==3.1.0
 pytube==15.0.0
 imutils==0.5.4
+minio==7.1.15
