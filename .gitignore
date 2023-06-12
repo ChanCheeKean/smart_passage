@@ -129,4 +129,41 @@ dmypy.json
 .pyre/
 
 # data
-# **/spl_data/*
+# **/src/data/processed/*
+checkpoints/
+
+# ├── src
+# ├── data
+# │   ├── landing
+# │   |   ├── box_1
+# |   │       └── train
+# |   │       │   ├── images
+# |   │       │   │   └── P1170680.JPG
+# |   │       │   └── labels
+# |   │       │       └── P1170680.txt
+# |   │       ├── test
+# |   │       │   ├── images
+# |   │       │   │   └── test.JPG
+# |   │       │   └── labels
+# |   │       │       └── test.txt
+# |   │       └── valid
+# |   │       │   ├── images
+# |   │       │   │   └── valid.JPG
+# |   │       │   └── labels
+# |   │       │       └── valid.txt
+# │   └── processed
+# │       └── train
+# │       │   ├── images
+# │       │   │   └── P1170680.JPG
+# │       │   └── labels
+# │       │       └── P1170680.txt
+# │       ├── test
+# │       │   ├── images
+# │       │   │   └── test.JPG
+# │       │   └── labels
+# │       │       └── test.txt
+# │       └── valid
+# │       │   ├── images
+# │       │   │   └── valid.JPG
+# │       │   └── labels
+# │       │       └── valid.txt
