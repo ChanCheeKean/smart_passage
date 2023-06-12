@@ -1,7 +1,40 @@
-train: /Users/cheekeanchan/Dev/smart_passage/src/data/processed/train/images
-val: /Users/cheekeanchan/Dev/smart_passage/src/data/processed/valid/images
-test: /Users/cheekeanchan/Dev/smart_passage/src/data/processed/test/images
-
-nc: 5
-# names: ['person', 'child', 'peopleWithwheelchair', 'wheelchair', 'luggage', 'cardboard']
-names: ['person', 'peopleWithwheelchair', 'wheelchair', 'luggage', 'cardboard']
+experiment:
+  name: 'yolonas_run_01'
+  checkpoint_dir: './checkpoints'
+  device: "cpu"
+model: 
+  name: 'yolo_nas_s'
+  max_epochs: 2
+  silent_mode: True
+  average_best_models: False
+  warmup_mode: linear_epoch_step
+  warmup_initial_lr: 0.000006
+  lr_warmup_epochs: 3
+  initial_lr: 0.0005 
+  lr_mode: 'cosine'
+  cosine_final_lr_ratio: 0.1
+  optimizer: "Adam"
+  zero_weight_decay_on_bias_and_bn: True
+  ema: True
+  ema_params: 
+    decay: 0.9
+    decay_type: threshold
+  optimizer_params: 
+    weight_decay: 0.001
+  metric_to_watch: 'mAP@0.50'
+dataset:
+  data_dir: '/Users/cheekeanchan/Dev/smart_passage/src'
+  train_images_dir: 'data/processed/train/images'
+  train_labels_dir: 'data/processed/train/labels'
+  val_images_dir: 'data/processed/valid/images'
+  val_labels_dir: 'data/processed/valid/labels'
+  test_images_dir: 'data/processed/test/images'
+  test_labels_dir: 'data/processed/test/labels'
+  num_workers: 2
+  batch_size: 16
+  classes: 
+    - 'person'
+    - 'bike'
+    - 'wheelchair'
+    - 'luggage'
+    - 'cardboard'

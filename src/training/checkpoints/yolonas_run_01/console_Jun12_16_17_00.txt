@@ -1,0 +1,112 @@
+============================================================
+New run started at 2023-06-12.16:16:49.423465
+sys.argv: "train.py --cfg default.yaml"
+============================================================
+The console stream is logged into /Users/cheekeanchan/sg_logs/console.log
+
+Caching annotations:   0%|                                                                                                                                       | 0/4108 [00:00<?, ?it/s]
+Caching annotations:   2%|██▌                                                                                                                          | 83/4108 [00:00<00:04, 827.62it/s]
+Caching annotations:   4%|█████                                                                                                                       | 166/4108 [00:00<00:08, 443.66it/s]
+Caching annotations:   6%|███████▏                                                                                                                    | 237/4108 [00:00<00:07, 519.68it/s]
+Caching annotations:   8%|██████████                                                                                                                  | 335/4108 [00:00<00:05, 658.91it/s]
+Caching annotations:  10%|████████████▍                                                                                                               | 414/4108 [00:00<00:05, 698.35it/s]
+Caching annotations:  13%|████████████████▎                                                                                                           | 539/4108 [00:00<00:04, 863.83it/s]
+Caching annotations:  16%|████████████████████▏                                                                                                       | 667/4108 [00:00<00:03, 987.71it/s]
+Caching annotations:  19%|███████████████████████▊                                                                                                   | 794/4108 [00:00<00:03, 1072.19it/s]
+Caching annotations:  22%|███████████████████████████▍                                                                                               | 918/4108 [00:01<00:02, 1121.75it/s]
+Caching annotations:  26%|███████████████████████████████▏                                                                                          | 1050/4108 [00:01<00:02, 1181.16it/s]
+Caching annotations:  29%|███████████████████████████████████▏                                                                                      | 1185/4108 [00:01<00:02, 1230.89it/s]
+Caching annotations:  32%|███████████████████████████████████████▎                                                                                  | 1322/4108 [00:01<00:02, 1272.51it/s]
+Caching annotations:  35%|███████████████████████████████████████████▎                                                                              | 1457/4108 [00:01<00:02, 1295.37it/s]
+Caching annotations:  39%|███████████████████████████████████████████████▏                                                                          | 1588/4108 [00:01<00:01, 1273.32it/s]
+Caching annotations:  42%|██████████████████████████████████████████████████▉                                                                       | 1717/4108 [00:01<00:01, 1270.09it/s]
+Caching annotations:  45%|██████████████████████████████████████████████████████▉                                                                   | 1848/4108 [00:01<00:01, 1279.43it/s]
+Caching annotations:  48%|██████████████████████████████████████████████████████████▊                                                               | 1982/4108 [00:01<00:01, 1297.22it/s]
+Caching annotations:  51%|██████████████████████████████████████████████████████████████▊                                                           | 2115/4108 [00:01<00:01, 1306.55it/s]
+Caching annotations:  55%|██████████████████████████████████████████████████████████████████▋                                                       | 2246/4108 [00:02<00:01, 1296.15it/s]
+Caching annotations:  58%|██████████████████████████████████████████████████████████████████████▌                                                   | 2376/4108 [00:02<00:01, 1282.42it/s]
+Caching annotations:  61%|██████████████████████████████████████████████████████████████████████████▌                                               | 2509/4108 [00:02<00:01, 1294.01it/s]
+Caching annotations:  64%|██████████████████████████████████████████████████████████████████████████████▎                                           | 2639/4108 [00:02<00:01, 1280.87it/s]
+Caching annotations:  67%|██████████████████████████████████████████████████████████████████████████████████▎                                       | 2770/4108 [00:02<00:01, 1288.32it/s]
+Caching annotations:  71%|██████████████████████████████████████████████████████████████████████████████████████                                    | 2899/4108 [00:02<00:00, 1271.63it/s]
+Caching annotations:  74%|██████████████████████████████████████████████████████████████████████████████████████████                                | 3032/4108 [00:02<00:00, 1287.85it/s]
+Caching annotations:  77%|█████████████████████████████████████████████████████████████████████████████████████████████▉                            | 3161/4108 [00:02<00:00, 1278.25it/s]
+Caching annotations:  80%|█████████████████████████████████████████████████████████████████████████████████████████████████▋                        | 3289/4108 [00:02<00:00, 1240.51it/s]
+Caching annotations:  83%|█████████████████████████████████████████████████████████████████████████████████████████████████████▍                    | 3414/4108 [00:02<00:00, 1226.30it/s]
+Caching annotations:  86%|█████████████████████████████████████████████████████████████████████████████████████████████████████████▎                | 3546/4108 [00:03<00:00, 1252.98it/s]
+Caching annotations:  89%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████             | 3672/4108 [00:03<00:00, 1253.38it/s]
+Caching annotations:  93%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████         | 3805/4108 [00:03<00:00, 1273.54it/s]
+Caching annotations:  96%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊     | 3933/4108 [00:03<00:00, 1256.84it/s]
+Caching annotations:  99%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌ | 4059/4108 [00:03<00:00, 1163.40it/s]
+Caching annotations: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 4108/4108 [00:03<00:00, 1147.52it/s]
+
+Caching annotations:   0%|                                                                                                                                        | 0/564 [00:00<?, ?it/s]
+Caching annotations:  17%|█████████████████████                                                                                                         | 94/564 [00:00<00:00, 931.82it/s]
+Caching annotations:  34%|██████████████████████████████████████████                                                                                   | 190/564 [00:00<00:00, 944.78it/s]
+Caching annotations:  51%|███████████████████████████████████████████████████████████████▌                                                             | 287/564 [00:00<00:00, 954.41it/s]
+Caching annotations:  68%|████████████████████████████████████████████████████████████████████████████████████▉                                        | 383/564 [00:00<00:00, 905.68it/s]
+Caching annotations:  86%|███████████████████████████████████████████████████████████████████████████████████████████████████████████▍                 | 485/564 [00:00<00:00, 942.67it/s]
+Caching annotations: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 564/564 [00:00<00:00, 958.48it/s]
+
+Caching annotations:   0%|                                                                                                                                        | 0/300 [00:00<?, ?it/s]
+Caching annotations:  35%|██████████████████████████████████████████▉                                                                                 | 104/300 [00:00<00:00, 1033.60it/s]
+Caching annotations:  70%|██████████████████████████████████████████████████████████████████████████████████████▊                                     | 210/300 [00:00<00:00, 1046.27it/s]
+Caching annotations: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 300/300 [00:00<00:00, 1038.94it/s]
+The console stream is now moved to ./checkpoints/yolonas_run_01/console_Jun12_16_17_00.txt
+[2023-06-12 16:17:23] INFO - sg_trainer_utils.py - TRAINING PARAMETERS:
+    - Mode:                         OFF
+    - Number of GPUs:               0          (0 available on the machine)
+    - Dataset size:                 3922       (len(train_set))
+    - Batch size per GPU:           16         (batch_size)
+    - Batch Accumulate:             1          (batch_accumulate)
+    - Total batch size:             16         (num_gpus * batch_size)
+    - Effective Batch size:         16         (num_gpus * batch_size * batch_accumulate)
+    - Iterations per epoch:         245        (len(train_loader))
+    - Gradient updates per epoch:   245        (len(train_loader) / batch_accumulate)
+
+Exception ignored in: <function _MultiProcessingDataLoaderIter.__del__ at 0x7f88303b7010>
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1466, in __del__
+    self._shutdown_workers()
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1430, in _shutdown_workers
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/multiprocessing/connection.py", line 936, in wait
+    ready = selector.select(timeout)
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt: 
+[2023-06-12 16:21:11] INFO - sg_trainer.py - 
+[MODEL TRAINING EXECUTION HAS BEEN INTERRUPTED]... Please wait until SOFT-TERMINATION process finishes and saves all of the Model Checkpoints and log files before terminating...
+[2023-06-12 16:21:11] INFO - sg_trainer.py - For HARD Termination - Stop the process again
+Exception ignored in: <function tqdm.__del__ at 0x7f883014e560>
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/tqdm/std.py", line 1144, in __del__
+    def __del__(self):
+KeyboardInterrupt: 
+[2023-06-12 16:21:13] INFO - base_sg_logger.py - [CLEANUP] - Successfully stopped system monitoring process
+Traceback (most recent call last):
+  File "/Users/cheekeanchan/Dev/smart_passage/src/training/train.py", line 171, in <module>
+    opt = parse_opt()
+  File "/Users/cheekeanchan/Dev/smart_passage/src/training/train.py", line 141, in main
+    ### evaluation ###
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/super_gradients/training/models/model_factory.py", line 197, in get
+    net = instantiate_model(model_name, arch_params, checkpoint_num_classes, pretrained_weights, download_required_code)
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/super_gradients/training/models/model_factory.py", line 125, in instantiate_model
+    if "arch_params" not in get_callable_param_names(architecture_cls):
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/site-packages/super_gradients/training/utils/sg_trainer_utils.py", line 449, in get_callable_param_names
+    return tuple(inspect.signature(obj).parameters)
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/inspect.py", line 3245, in signature
+    return Signature.from_callable(obj, follow_wrapped=follow_wrapped,
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/inspect.py", line 2993, in from_callable
+    return _signature_from_callable(obj, sigcls=cls,
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/inspect.py", line 2458, in _signature_from_callable
+    if _signature_is_builtin(obj):
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/inspect.py", line 1992, in _signature_is_builtin
+    return (isbuiltin(obj) or
+  File "/opt/anaconda3/envs/spl_dev_train/lib/python3.10/inspect.py", line 411, in isbuiltin
+    return isinstance(object, types.BuiltinFunctionType)
+KeyboardInterrupt
