@@ -55,10 +55,10 @@ def main():
                             with open(txt_file) as f:
                                 text = [t.split(" ") for t in f.readlines()]
 
-                            ### skip this file if contains contaiminated labels ###
+                            ### ignore this file if contains contaiminated labels ###
                             text_labels = [t[0] for t in text]
-                            if replace_dict[_d].get('skip', None):
-                                if any([int(t) in replace_dict[_d]['skip'] for t in text_labels]):
+                            if replace_dict[_d].get('ignore', None):
+                                if any([int(t) in replace_dict[_d]['ignore'] for t in text_labels]):
                                     # print(f"Skipping contaiminated file: {name}")
                                     continue
 
