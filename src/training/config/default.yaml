@@ -10,7 +10,7 @@ model:
   warmup_mode: linear_epoch_step
   warmup_initial_lr: 0.000006
   lr_warmup_epochs: 3
-  initial_lr: 0.0005 
+  initial_lr: 0.0005
   lr_mode: 'cosine'
   cosine_final_lr_ratio: 0.1
   optimizer: "Adam"

@@ -13,7 +13,7 @@ from minio import Minio
 MINIO_ACCESS_KEY = os.environ.get('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY = os.environ.get('MINIO_SECRET_KEY')
 domain = '192.168.96.95:9000'
-
+ 
 def main(opt):
     minioClient = Minio(
         domain, 
@@ -23,7 +23,7 @@ def main(opt):
     
     for item in minioClient.list_objects(opt.bucket.name,recursive=True):
         minioClient.fget_object(opt.bucket.name, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
-        
+
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument('--origin', type=str, default='./data', help='local path')
@@ -35,4 +35,4 @@ if __name__ == '__main__':
     opt = parse_opt()
     main(opt)
 
-# python download.py --origin "../data/" --bucket "smart-passage-logic" --prefix "/data/landing"
+# python download.py --origin "../data/" --bucket "smart-passage-logic" --prefix "data/landing"

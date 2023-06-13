@@ -18,7 +18,7 @@ def main(opt):
             num_classes=len(config['dataset']['classes']), 
             checkpoint_path=f"{CHECKPOINT_DIR}/{config['experiment']['name']}/ckpt_best.pth"
         )
-    
+
     # test
     image = cv2.imread('/content/smart_passage/src/spl_data/processed/test/images/0473_p_1_jpg.rf.886b6d12402598dbd0ad68cf8b80f1f8.jpg') 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
