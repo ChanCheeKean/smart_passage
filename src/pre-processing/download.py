@@ -23,10 +23,13 @@ def main(opt):
     )
     
     for item in tqdm(minioClient.list_objects(opt.bucket, prefix=opt.prefix, recursive=True)):
+        local_name = item.object_name.replace(opt.prefix, '')
+        if local_name.startswith("/"):
+            local_name =  local_name[1:]
         minioClient.fget_object(
             opt.bucket, 
             item.object_name, 
-            os.path.join(f"{opt.origin}", item.object_name.replace(opt.prefix, ''))
+            os.path.join(f"{opt.origin}", local_name)
         )
 
 def parse_opt(known=False):
