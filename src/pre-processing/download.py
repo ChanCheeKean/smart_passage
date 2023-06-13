@@ -21,8 +21,9 @@ def main(opt):
         secret_key=MINIO_SECRET_KEY,
         secure=False)
     
-    for item in minioClient.list_objects(opt.bucket.name,recursive=True):
-        minioClient.fget_object(opt.bucket.name, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
+    for item in tqdm(minioClient.list_objects(opt.bucket.name,recursive=True)):
+        print(item)
+        # minioClient.fget_object(opt.bucket.name, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
