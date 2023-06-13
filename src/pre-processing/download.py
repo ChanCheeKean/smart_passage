@@ -19,11 +19,12 @@ def main(opt):
         domain, 
         access_key=MINIO_ACCESS_KEY,
         secret_key=MINIO_SECRET_KEY,
-        secure=False)
+        secure=False
+    )
     
-    for item in tqdm(minioClient.list_objects(opt.bucket.name,recursive=True)):
-        print(item)
-        # minioClient.fget_object(opt.bucket.name, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
+    for item in tqdm(minioClient.list_objects(opt.bucket, recursive=True)):
+        print(item, item.object_name,)
+        # minioClient.fget_object(opt.bucket, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
