@@ -23,8 +23,11 @@ def main(opt):
     )
     
     for item in tqdm(minioClient.list_objects(opt.bucket, prefix=opt.prefix, recursive=True)):
-        print(item.object_name.replace(opt.prefix, ''))
-        # minioClient.fget_object(opt.bucket, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
+        minioClient.fget_object(
+            opt.bucket, 
+            item.object_name, 
+            os.path.join(f"{opt.origin}", item.object_name.replace(opt.prefix, ''))
+        )
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
