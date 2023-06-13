@@ -23,8 +23,8 @@ def main(opt):
     )
     
     for item in tqdm(minioClient.list_objects(opt.bucket, recursive=True)):
-        print(item, item.object_name,)
-        # minioClient.fget_object(opt.bucket, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
+        # print(item, item.object_name,)
+        minioClient.fget_object(opt.bucket, item.object_name, os.path.join(f"{opt.origin}", item.object_name))
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
@@ -37,4 +37,4 @@ if __name__ == '__main__':
     opt = parse_opt()
     main(opt)
 
-# python download.py --origin "../data/" --bucket "smart-passage-logic" --prefix "data/landing"
+# python download.py --origin "../data/test" --bucket "smart-passage-logic" --prefix "data/landing"
