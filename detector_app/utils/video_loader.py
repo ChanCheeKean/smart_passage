@@ -86,7 +86,7 @@ class ImageLoader(object):
         self.video_loader = cv2.VideoCapture(self.source)
         self.id_paid = []
         self.id_complete = []
-        self.id_stay = {}
+        self.id_stay = {'left': {}, 'safety': {}, 'right': {}}
         self.passenger_count = 0
 
         # skip some frames and jump

@@ -35,7 +35,8 @@ def check_roi(box, in_safety=False):
     width = box[2] - box[0]
     height = box[3] - box[1]
 
-    in_safe = (center < gate_xyxy['right-safety']) and (center > gate_xyxy['left-safety']) 
+    # in_safe = (center < gate_xyxy['right-safety']) and (center > gate_xyxy['left-safety']) 
+    in_safe = (center < gate_xyxy['right-safety'])
     in_roi = (center < gate_xyxy['right']) and (center > gate_xyxy['left']) and (box[1] < gate_xyxy['top']) and (box[3] > gate_xyxy['bottom'])
 
     # to remove overly big object
@@ -108,8 +109,8 @@ def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
         if zone == paid_zone:
             if obj_id not in id_paid:
                 id_paid.append(obj_id)
-        elif (zone != paid_zone) & (zone != 'safety'):
-            if (obj_id in id_paid) and (obj_id not in id_complete):
+        elif (zone != paid_zone):
+            if (obj_id in id_paid) and (obj_id not in id_complete) and (zone != 'safety'):
                 id_complete.append(obj_id)
             elif obj_id not in id_paid:
                 anti_flag = 1
@@ -119,16 +120,22 @@ def detect_dir(detections, id_paid, id_complete, paid_zone='right'):
 
 ### loitering ###
 def detect_loiter(detections, id_stay, stay_limit=5):
+    '''
+    definition:
+    stay in the same zone more than N seconds
+    '''
     loiter_flag = 0
     detections = [det for det in detections if det[5].item() == 0]
     lis = []
 
     for det in detections:
-        obj_id = det[6].item()
-        if obj_id not in id_stay:
-            id_stay[obj_id] = int(time.time())
+        obj_id = det[6].item()  
+        zone = determine_zone(det)
+
+        if obj_id not in id_stay[zone]:
+            id_stay[zone][obj_id] = int(time.time())
         else:
-            stay_time = int(time.time()) - id_stay.get(obj_id, 0)
+            stay_time = int(time.time()) - id_stay[zone].get(obj_id, 0)
             if stay_time > stay_limit:
                 loiter_flag = 1
                 lis.append(obj_id)
@@ -152,13 +159,12 @@ def update_zone_info(dets):
         'tailgate_list': [],
         'anti_list': [],
         'loiter_list': [],
-        'passenger_count' : 0, 
+        'total_passenger_count' : 0, 
     }
 
     for det in dets:
-        obj_cls = det[5].item()
         zone = determine_zone(det)
-        if obj_cls == 0:
+        if det[5].item() == 0:
             info_dict['human_gate_count'] += 1
             info_dict[f'human_{zone}'] += 1
         else:
@@ -200,9 +206,9 @@ def plot_image(img, detections, font_size, labels, mm_per_pixel, flag=False, plo
         bbox = [round(i, 2) for i in res[:4].tolist()]
         conf = round(res[4].item(), 3)
         obj_cls = res[5].item()
+        area = int((res[3] - res[1]) * mm_per_pixel) * int((res[2] - res[0]) * mm_per_pixel)
 
-        object_id = res[6].item() if obj_cls == 0 \
-            else f"H:{int((res[3] - res[1]) * mm_per_pixel)}mm W:{int((res[2] - res[0]) * mm_per_pixel)}mm"
+        object_id = res[6].item() if obj_cls == 0 else f"Area: {area // 10}cm"
         label_text =  labels[int(obj_cls)]
 
         if (flag) and (obj_cls == 0):
@@ -223,7 +229,6 @@ class DeepSortTracker():
         reid_weights = Path(tracker_config['reid_weights'])
         self.device = select_device(config['model']['device'])
         self.deep_tracker = create_tracker(tracking_method, tracking_config, reid_weights, self.device, False)
-
         if hasattr(self.deep_tracker, 'model'):
             if hasattr(self.deep_tracker.model, 'warmup'):
                 self.deep_tracker.model.warmup()
@@ -323,11 +328,12 @@ class YoloLoader():
 
         self.model = models.get(
             self.model_name,
-            # num_classes=len(self.classes), 
             pretrained_weights='coco',
+            # num_classes=len(self.classes), 
+            # checkpoint_path=f"{CHECKPOINT_DIR}/{config['experiment']['name']}/ckpt_best.pth"
         ).to(self.device)
 
-        self.labels = model_config['classes']
+        self.model.eval()
         self.labels =  self.model._class_names
         self.half = False
 
@@ -350,9 +356,7 @@ class YoloLoader():
         #     lis.append(det)
         # results = torch.cat(lis, dim=0)
 
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        self.model = self.model.eval()
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         with torch.no_grad():
             result = list(
                 self.model.predict(image, iou=self.iou_thres, conf=self.conf_thres)
@@ -367,8 +371,7 @@ class YoloLoader():
         # filter out of roi
         lis = []
         for ind, det in enumerate(results):
-            if (check_roi(det, in_safety=False)) and (det[4].item()> self.conf_thres):
+            if check_roi(det, in_safety=False):
                 lis.append(ind)
-
         results = results[lis, :]
         return results

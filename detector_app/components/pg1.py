@@ -36,7 +36,7 @@ def video_gen(camera, model, object_tracker):
         if ret:
             # pre-processing
             image = cv2.resize(image, camera.img_sz, interpolation=cv2.INTER_AREA)
-
+            
             if camera.model_detect:
                 # detect and tracking
                 results = model.detect(image)
@@ -50,6 +50,11 @@ def video_gen(camera, model, object_tracker):
                 info_dict['tailgate_flag'] = tailgate_flag
                 info_dict['tailgate_lis'] = lis
 
+                # loitering
+                loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
+                info_dict['loiter_flag'] = loiter_flag
+                info_dict['loiter_lis'] = lis
+
                 # anti detection
                 anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
                     results, camera.id_paid, camera.id_complete, paid_zone='right')
@@ -57,15 +62,10 @@ def video_gen(camera, model, object_tracker):
                 info_dict['antidir_lis'] = lis
 
                 # update passenger count
-                info_dict['passenger_count'] = len(camera.id_complete)
-
-                # loitering
-                loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
-                info_dict['loiter_flag'] = loiter_flag
-                info_dict['loiter_lis'] = lis
+                info_dict['total_passenger_count'] = len(camera.id_complete)
 
                 # plotting
-                flag = any((anti_flag, tailgate_flag, loiter_flag))
+                flag = tailgate_flag
                 plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag)
 
                 # capture image if violation
@@ -124,29 +124,42 @@ indicator_container = html.Div(
             className='my-3 ps-2'
         ),
 
-        dbc.Button(
-            children="Clear Alert", 
-            id='pg1_clear_warning_bt',
-            outline=False, 
-            disabled=False,
-            color="danger", 
-            size="lg", 
-            className="ps-2 mt-4 mx-auto",
-        ),
     ], 
     style={'margin-left': 'auto', 'margin-right': 'auto'}
 )
 
-### images container ###
-archive_card = dbc.Card(
+### alert card###
+alert_card = dbc.Card(
     children=[
-        dbc.CardHeader(html.Span('Image Archive'), className='card_header', style={'height' : '5vh'}),
+        dbc.CardHeader(html.Span('Alert'), className='card_header', style={}),
         dbc.CardBody(
-            children=[html.Div(id='pg1_img_archive')], 
-            style={'max-height' : '85vh', 'height' : '85vh', 'overflow-y' : 'scroll'}
+            children=[html.Div(id='pg1_alert')], 
+            style={'height' : '10vh'}
         ),
     ],
     className='card'
+)
+
+### images archive ###
+archive_card = dbc.Card(
+    children=[
+        dbc.CardHeader(html.Span('Image Archive'), className='card_header', style={}),
+        dbc.CardBody(
+            children=[html.Div(id='pg1_img_archive')], 
+            style={'height' : '68vh', 'overflow-y' : 'scroll'}
+        ),
+
+        dbc.Button(
+            children="Clear", 
+            id='pg1_clear_warning_bt',
+            outline=False, 
+            disabled=False,
+            color="info", 
+            size="md", 
+            className="",
+        ),
+    ],
+    className='card my-2'
 )
 
 ### object count container ###
@@ -232,14 +245,14 @@ count_container = dbc.Row(
 ### final layout ###
 layout = html.Div(
     children = [
-        dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
+        dcc.Interval(id='pg1_interval_xs', interval=1*1000, n_intervals=0),
         dcc.Interval(id='pg1_interval_1s', interval=1.5*1000, n_intervals=0),
-        html.H2("SmartGate Passage", className='text-info text-center my-1 fs-1'),
+        html.H2("SmartGate Momitoring", className='text-info text-center my-1 fs-3'),
         dbc.Row(
             children=[
                 dbc.Col(indicator_container, width=1),
                 dbc.Col([video_container, count_container], width=8),
-                dbc.Col(archive_card, width=3),
+                dbc.Col([alert_card, archive_card], width=3),
                 ],
             className='my-3 mx-2'),
     ]

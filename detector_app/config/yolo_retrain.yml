@@ -1,14 +1,14 @@
 video:
-  source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  # source: "./static/backup/luggage.mp4"
+  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
-  model_detect: True
+  model_detect: False
   output_file_name: "./static/test_video/passenger.avi"
   font_size: 2
   mm_per_pixel: 1.85
-  trigger_distance: 100
-  stay_limit: 30
+  trigger_distance: 150
+  stay_limit: 3
   img_sz:
   - 640
   - 640
@@ -24,7 +24,7 @@ object_tracker:
   tracking_method: "deepocsort" 
   tracking_config: "./trackers/deepocsort/configs/deepocsort.yaml"
 model:
-  model_name: "yolo_nas_m"
+  model_name: "yolo_nas_s"
   conf_thres: 0.3
   iou_thres: 0.5
   max_det: 1000
