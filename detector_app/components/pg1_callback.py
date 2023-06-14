@@ -79,10 +79,9 @@ def update_output(_int, _clicks, alert_state):
                     ind_warning = '#00FF00'
                 
         except Exception as e:
-            # print(f"Load json Failed, Error: {e}")
+            print(f"Load json Failed, Error: {e}")
             pass
         
-    print('test', alert, ind_normal, ind_warning)
     return h_left, h_safety, h_right, o_left, o_safety, o_right, alert, ind_normal, ind_warning
 
 @app.callback(

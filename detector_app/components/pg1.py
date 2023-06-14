@@ -244,7 +244,7 @@ count_container = dbc.Row(
 ### final layout ###
 layout = html.Div(
     children = [
-        dcc.Interval(id='pg1_interval_xs', interval=1*1000, n_intervals=0),
+        dcc.Interval(id='pg1_interval_xs', interval=0.1*1000, n_intervals=0),
         dcc.Interval(id='pg1_interval_1s', interval=1.5*1000, n_intervals=0),
         html.H2("SmartGate Momitoring", className='text-info text-center my-1 fs-3'),
         dbc.Row(
