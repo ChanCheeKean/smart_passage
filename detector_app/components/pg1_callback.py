@@ -51,7 +51,7 @@ def update_output(_int, _clicks, alert_state):
             tg_f, at_f, lt_f = json_data['tailgate_flag'], json_data['antidir_flag'], json_data['loiter_flag']
 
             # if any flag
-            if any(tg_f, at_f, lt_f):
+            if any([tg_f, at_f, lt_f]):
                 ind_warning = '#ff0303'
                 if isinstance(alert_state, list):
                     alert = no_update
