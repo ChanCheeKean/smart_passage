@@ -1,6 +1,6 @@
 video:
-  # source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
-  source: "./static/backup/luggage.mp4"
+  source: "rtsp://service:Thales1$8o8@192.168.100.108:554/live"
+  # source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
   model_detect: True
@@ -24,7 +24,7 @@ object_tracker:
   tracking_method: "deepocsort" 
   tracking_config: "./trackers/deepocsort/configs/deepocsort.yaml"
 model:
-  model_name: "yolo_nas_s"
+  model_name: "yolo_nas_m"
   conf_thres: 0.3
   iou_thres: 0.5
   max_det: 1000
