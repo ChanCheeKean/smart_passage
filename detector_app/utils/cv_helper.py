@@ -326,7 +326,7 @@ class YoloLoader():
             # num_classes=len(self.classes), 
             pretrained_weights='coco',
         ).to(self.device)
-        
+
         self.labels = model_config['classes']
         self.labels =  self.model._class_names
         self.half = False
@@ -352,7 +352,7 @@ class YoloLoader():
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        model = model.eval()
+        self.model = self.model.eval()
         with torch.no_grad():
             result = list(
                 self.model.predict(image, iou=self.iou_thres, conf=self.conf_thres)
