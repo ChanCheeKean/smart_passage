@@ -14,9 +14,9 @@ video:
   - 640
 gate_roi:
   left: 20
-  top: 600
+  top: 590
   right: 620
-  bottom: 630
+  bottom: 620
   left-safety: 180
   right-safety : 400
 object_tracker:
