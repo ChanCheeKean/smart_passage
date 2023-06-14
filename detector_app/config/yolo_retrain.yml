@@ -24,7 +24,7 @@ object_tracker:
   tracking_method: "deepocsort" 
   tracking_config: "./trackers/deepocsort/configs/deepocsort.yaml"
 model:
-  model_name: "yolo_nas_m"
+  model_name: "yolo_nas_s"
   conf_thres: 0.3
   iou_thres: 0.5
   max_det: 1000
