@@ -309,6 +309,10 @@ class YoloLoader():
         self.model_name = model_config['model_name']
         self.device = select_device(model_config['device'])
 
+        # super_gradients.setup_device(
+        #     device=model_config['device'], 
+        # )
+
         # load model, use FP16 half-precision inference, use OpenCV DNN for ONNX inference 
         # self.model = DetectMultiBackend(
         #     self.model_name, device=self.device, dnn=self.dnn, data='"./yolov5/data/Objects365.yaml"', fp16=self.half)
@@ -321,7 +325,8 @@ class YoloLoader():
             self.model_name,
             # num_classes=len(self.classes), 
             pretrained_weights='coco',
-        )
+        ).to(self.device)
+        
         self.labels = model_config['classes']
         self.labels =  self.model._class_names
         self.half = False
@@ -346,7 +351,13 @@ class YoloLoader():
         # results = torch.cat(lis, dim=0)
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        result = list(self.model.predict(image, iou=self.iou_thres, conf=self.conf_thres))[0]
+
+        model = model.eval()
+        with torch.no_grad():
+            result = list(
+                self.model.predict(image, iou=self.iou_thres, conf=self.conf_thres)
+            )[0]
+
         results = np.concatenate((
                         result.prediction.bboxes_xyxy, 
                         result.prediction.confidence.reshape(-1, 1), 
