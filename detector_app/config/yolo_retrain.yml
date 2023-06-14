@@ -3,7 +3,7 @@ video:
   source: "./static/backup/luggage.mp4"
   save_video: False
   plot_roi: False
-  model_detect: False
+  model_detect: True
   output_file_name: "./static/test_video/passenger.avi"
   font_size: 2
   mm_per_pixel: 1.85
