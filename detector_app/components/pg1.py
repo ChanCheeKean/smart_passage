@@ -42,28 +42,27 @@ def video_gen(camera, model, object_tracker):
                 # update zone in the dictionaries
                 info_dict = update_zone_info(results)
 
-                # # tailgate detection
-                # tailgate_flag, lis = tailgating_detection(results, camera.trigger_distance)
-                # info_dict['tailgate_flag'] = tailgate_flag
-                # info_dict['tailgate_lis'] = lis
+                # tailgate detection
+                tailgate_flag, lis = tailgating_detection(results, camera.trigger_distance)
+                info_dict['tailgate_flag'] = tailgate_flag
+                info_dict['tailgate_lis'] = lis
 
-                # # anti detection
-                # anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
-                #     results, camera.id_paid, camera.id_complete, paid_zone='right')
-                # info_dict['antidir_flag'] = anti_flag
-                # info_dict['antidir_lis'] = lis
+                # anti detection
+                anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
+                    results, camera.id_paid, camera.id_complete, paid_zone='right')
+                info_dict['antidir_flag'] = anti_flag
+                info_dict['antidir_lis'] = lis
 
-                # # update passenger count
-                # info_dict['passenger_count'] = len(camera.id_complete)
+                # update passenger count
+                info_dict['passenger_count'] = len(camera.id_complete)
 
-                # # loitering
-                # loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
-                # info_dict['loiter_flag'] = loiter_flag
-                # info_dict['loiter_lis'] = lis
+                # loitering
+                loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
+                info_dict['loiter_flag'] = loiter_flag
+                info_dict['loiter_lis'] = lis
 
-                # # plotting
-                # flag = any((anti_flag, tailgate_flag, loiter_flag))
-                flag = False
+                # plotting
+                flag = any((anti_flag, tailgate_flag, loiter_flag))
                 plot_image(image, results, camera.font_size, model.labels, camera.mm_per_pixel, flag)
 
                 # capture image if violation

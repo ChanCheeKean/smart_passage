@@ -1,6 +1,7 @@
 import cv2
 import torch
 import time
+import numpy as np
 from pathlib import Path
 from utils.config_loader import config
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
@@ -11,6 +12,7 @@ from ultralytics.yolo.utils.plotting import Annotator, colors
 from ultralytics.nn.autobackend import AutoBackend
 from ultralytics.yolo.utils.ops import non_max_suppression, scale_boxes
 from trackers.multi_tracker_zoo import create_tracker
+from super_gradients.training import models
 
 ### gate roi ###
 gate_xyxy = config['gate_roi']
@@ -38,7 +40,7 @@ def check_roi(box, in_safety=False):
 
     # to remove overly big object
     in_size = ((width * height) < 100000) | (box[5] == 0)
-    return True
+
     if in_safety:
         return in_roi and in_safe and in_size
     else:
@@ -310,30 +312,47 @@ class YoloLoader():
         # load model, use FP16 half-precision inference, use OpenCV DNN for ONNX inference 
         # self.model = DetectMultiBackend(
         #     self.model_name, device=self.device, dnn=self.dnn, data='"./yolov5/data/Objects365.yaml"', fp16=self.half)
-        self.model = AutoBackend(self.model_name, device=self.device, dnn=False, fp16=False)
-        self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
-        self.labels = list(self.names.values())
+        # self.model = AutoBackend(self.model_name, device=self.device, dnn=False, fp16=False)
+        # self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
+        # self.labels = list(self.names.values())
+        # self.model = AutoBackend(self.model_name, device=self.device, dnn=False, fp16=False)
+
+        self.model = models.get(
+            self.model_name,
+            # num_classes=len(self.classes), 
+            pretrained_weights='coco',
+        )
+        self.labels = model_config['classes']
+        self.labels =  self.model._class_names
         self.half = False
 
     def detect(self, image):
         # processing image before feeding to model
-        im = torch.from_numpy(image).to(self.device)
-        im = (im.half() if self.half else im.float()) / 255.0
-        im = torch.unsqueeze(im, 0)
-        im = torch.permute(im, (0, 3, 1, 2))
+        # im = torch.from_numpy(image).to(self.device)
+        # im = (im.half() if self.half else im.float()) / 255.0
+        # im = torch.unsqueeze(im, 0)
+        # im = torch.permute(im, (0, 3, 1, 2))
 
-        # predictions and non max suppression
-        preds = self.model(im, augment=False, visualize=False)
-        results = non_max_suppression(
-            preds, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms, max_det=self.max_det)
+        # # predictions and non max suppression
+        # preds = self.model(im, augment=False, visualize=False)
+        # results = non_max_suppression(
+        #     preds, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms, max_det=self.max_det)
         
-        # scale box and convert to tensor
-        lis = []
-        for _, det in enumerate(results):
-            det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], image.shape).round()
-            lis.append(det)
-        results = torch.cat(lis, dim=0)
-            
+        # # scale box and convert to tensor
+        # lis = []
+        # for _, det in enumerate(results):
+        #     det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], image.shape).round()
+        #     lis.append(det)
+        # results = torch.cat(lis, dim=0)
+
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        result = list(self.model.predict(image, iou=self.iou_thres, conf=self.conf_thres))[0]
+        results = np.concatenate((
+                        result.prediction.bboxes_xyxy, 
+                        result.prediction.confidence.reshape(-1, 1), 
+                        result.prediction.labels.reshape(-1, 1)), axis=1)
+        results = torch.Tensor(results)
+
         # filter out of roi
         lis = []
         for ind, det in enumerate(results):
@@ -342,5 +361,3 @@ class YoloLoader():
 
         results = results[lis, :]
         return results
-
-
