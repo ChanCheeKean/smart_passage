@@ -53,7 +53,7 @@ def video_gen(camera, model, object_tracker):
                 loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
                 info_dict['loiter_flag'] = loiter_flag
                 info_dict['loiter_lis'] = lis
-                print(camera.id_stay)
+                print(loiter_flag)
 
                 # anti detection
                 anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
