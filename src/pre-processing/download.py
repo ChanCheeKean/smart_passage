@@ -43,4 +43,4 @@ if __name__ == '__main__':
     opt = parse_opt()
     main(opt)
 
-# python download.py --origin "../test" --bucket "smart-passage-logic" --prefix "data/landing"
+# python download.py --origin "../data" --bucket "smart-passage-logic" --prefix "data/landing"

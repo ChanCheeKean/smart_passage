@@ -21,10 +21,13 @@ from utils.cv_helper import (
 )
 
 ### clear images before start ###
-if os.listdir("./static/img/"):
-    files = glob.glob('./static/img/*')
-    for f in files:
-        os.remove(f)
+try:
+    if os.listdir("./static/img/"):
+        files = glob.glob('./static/img/*')
+        for f in files:
+            os.remove(f)
+except:
+    pass
 
 ### video streaming ###
 def video_gen(camera, model, object_tracker):
