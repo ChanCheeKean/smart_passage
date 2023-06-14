@@ -21,7 +21,7 @@ from utils.cv_helper import (
 )
 
 ### clear images before start ###
-if os.listdir("./static/img/"):
+if os.path.exists("./static/img/"):
     files = glob.glob('./static/img/*')
     for f in files:
         os.remove(f)
