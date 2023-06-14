@@ -49,8 +49,7 @@ def update_output(_int, _clicks, alert_state):
             
             # event flag
             tg_f, at_f, lt_f = json_data['tailgate_flag'], json_data['antidir_flag'], json_data['loiter_flag']
-            print('flag', tg_f, at_f, lt_f)
-
+            
             # if any flag
             if any(tg_f, at_f, lt_f):
                 ind_warning = '#ff0303'
@@ -115,4 +114,3 @@ def update_output(n):
         return child_list
     else:
         return None
-    
