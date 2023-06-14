@@ -53,7 +53,6 @@ def video_gen(camera, model, object_tracker):
                 loiter_flag, lis = detect_loiter(results, camera.id_stay, camera.stay_limit)
                 info_dict['loiter_flag'] = loiter_flag
                 info_dict['loiter_lis'] = lis
-                print(loiter_flag)
 
                 # anti detection
                 anti_flag, camera.id_paid, camera.id_complete, lis = detect_dir(
@@ -84,8 +83,8 @@ def video_gen(camera, model, object_tracker):
             try:
                 with open('./static/json/image_output.json', 'w') as f:
                     json.dump(info_dict, f)
-            except:
-                pass
+            except Exception as e:
+                print(f"Saved Failed: {e}")
 
             _, jpeg = cv2.imencode('.jpg', image)
             frame = jpeg.tobytes()
